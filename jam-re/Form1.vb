@@ -43,6 +43,8 @@ Public Class Form1
 
             Threading.Thread.Sleep(1)
         Loop
+        RichTextBox1.ScrollToCaret()
+        Application.DoEvents()
     End Sub
 
     Sub closeForm()
@@ -59,6 +61,7 @@ Public Class Form1
 
             Threading.Thread.Sleep(1)
         Loop
+        Application.DoEvents()
     End Sub
 
     Sub Execute()
