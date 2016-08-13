@@ -179,6 +179,8 @@ Public Class Form1
                     CmdIfTaskExist(parameter)
                 Case "taskkill"
                     CmdTaskKill(parameter)
+                Case "taskclose"
+                    CmdTaskClose(parameter)
             End Select
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
@@ -363,6 +365,11 @@ Public Class Form1
             item.Kill()
         Next
     End Sub
+    Public Sub CmdTaskClose(parameter As String)
+        For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameter)
+            item.CloseMainWindow()
+        Next
+    End Sub
     
 End Class
 
@@ -390,3 +397,4 @@ End Class
 'mkDir Pfad;
 'ifTaskExist taskname | truelable | falselable;
 'taskKill taskname;
+'taskClose taskname;
