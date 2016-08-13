@@ -1,7 +1,7 @@
 ﻿Imports System.Drawing.Drawing2D
 Public Class Form1
     Dim ready As Boolean = False
-    Const version As String = "1.3"
+    Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor
     Public commandPointer As Integer = 0
     Public commands As New List(Of String)
 
@@ -81,7 +81,8 @@ Public Class Form1
                     Next
                 End If
                 'Ersetze weitere Variablen
-                text = text.Replace("%_br%", Chr(13) & Chr(10)) '.Replace("%appdata%", My.Computer.FileSystem.SpecialDirectories.CurrentUserApplicationData).Replace("%allappdata%", My.Computer.FileSystem.SpecialDirectories.AllUsersApplicationData).Replace("%programfiles%", My.Computer.FileSystem.SpecialDirectories.ProgramFiles).Replace("%programs%", My.Computer.FileSystem.SpecialDirectories.Programs)
+                text = text.Replace("%_br%", Chr(13) & Chr(10))
+                text = Environment.ExpandEnvironmentVariables(text)
 
 
                 For Each item As String In text.Split(";")
