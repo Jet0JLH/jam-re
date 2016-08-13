@@ -135,6 +135,8 @@ Public Class Form1
         Try
             Dim tempCommand As String = command.ToLower
             Select Case tempCommand
+                Case "#"
+                    'Hierbei handelt es sich um ein Kommentar. Es wird nichts unternommen!
                 Case "message"
                     CmdMessage(parameter)
                 Case "sleep", "wait"
@@ -374,6 +376,7 @@ Public Class Form1
 End Class
 
 
+'# kommentar;
 'message text;
 'sleep/wait sekunden;
 'delDir pfad
