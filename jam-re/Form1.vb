@@ -177,6 +177,8 @@ Public Class Form1
                     CmdMkDir(parameter)
                 Case "iftaskexist"
                     CmdIfTaskExist(parameter)
+                Case "taskkill"
+                    CmdTaskKill(parameter)
             End Select
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
@@ -340,7 +342,6 @@ Public Class Form1
     Public Sub CmdMkDir(ByVal parameter As String)
         My.Computer.FileSystem.CreateDirectory(parameter)
     End Sub
-
     Public Sub CmdIfTaskExist(parameter As String)
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim splitedParameter As New List(Of String)
@@ -356,6 +357,11 @@ Public Class Form1
                 CmdGoto(splitedParameter(2))
             End If
         End If
+    End Sub
+    Public Sub CmdTaskKill(parameter As String)
+        For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameter)
+            item.Kill()
+        Next
     End Sub
     
 End Class
@@ -383,3 +389,4 @@ End Class
 'writeFileAppend Text > Pfad;
 'mkDir Pfad;
 'ifTaskExist taskname | truelable | falselable;
+'taskKill taskname;
