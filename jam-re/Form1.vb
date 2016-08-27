@@ -2,15 +2,15 @@
 Public Class Form1
     Dim ready As Boolean = False
     Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor
-    Public commandPointer As Integer = 0
     Public commands As New List(Of String)
+    Dim Script As String = ""
 
     Dim openThread As New Threading.Thread(AddressOf openForm)
     Private Sub Form1_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
         CheckForIllegalCrossThreadCalls = False
         Label1.Text = "Version: " & version
 
-        Dim exe As New Threading.Thread(AddressOf Execute)
+        Dim exe As New Threading.Thread(AddressOf executeThread)
         exe.Start()
         openThread.Start()
     End Sub
@@ -64,53 +64,73 @@ Public Class Form1
         Application.DoEvents()
     End Sub
 
-    Sub Execute()
-        Dim text As String = ""
+    Sub executeThread()
+        If loadScript() = True Then
+            Execute()
+        End If
+        ende()
+    End Sub
+    Function loadScript() As Boolean
+        Script = ""
         Try
             If Environment.GetCommandLineArgs.Count <= 1 Then
                 RichTextBox1.AppendText(vbCrLf & "Es wurde keine Datei übergeben!")
                 ende()
+                Return False
             Else
                 Using sr As System.IO.StreamReader = New System.IO.StreamReader(Environment.GetCommandLineArgs(1), System.Text.Encoding.Default)
-                    text = sr.ReadToEnd.ToString
+                    Script = sr.ReadToEnd.ToString
                     sr.Close()
                 End Using
-                text = text.Replace(Chr(10), "").Replace(Chr(13), "").Replace(vbTab, "")
+                Script = Script.Replace(Chr(10), "").Replace(Chr(13), "").Replace(vbTab, "")
 
                 'Prüfen ob weitere Parameter übergeben wurde
                 If Environment.GetCommandLineArgs.Count >= 3 Then
                     For i As Integer = 2 To Environment.GetCommandLineArgs.Count - 1
-                        text = text.Replace("%" & i - 1 & "%", Environment.GetCommandLineArgs(i))
+                        Script = Script.Replace("%" & i - 1 & "%", Environment.GetCommandLineArgs(i))
                     Next
                 End If
                 'Ersetze weitere Variablen
-                text = text.Replace("%_br%", Chr(13) & Chr(10))
-                text = Environment.ExpandEnvironmentVariables(text)
+                Script = Script.Replace("%_br%", Chr(13) & Chr(10))
+                Script = Environment.ExpandEnvironmentVariables(Script)
 
 
-                For Each item As String In text.Split(";")
+                For Each item As String In Script.Split(";")
                     commands.Add(item)
                 Next
-                For Me.commandPointer = 0 To commands.Count - 1
-                    Dim tempString As String = ""
-                    For Each tempChar As Char In commands(commandPointer)
-                        If tempChar <> " " Then
-                            tempString &= tempChar
-                        Else
-                            Exit For
-                        End If
-                    Next
-                    If commands(commandPointer).Length <= tempString.Length + 1 Then
-                        CommandSelect(tempString)
-                    Else
-                        CommandSelect(tempString, commands(commandPointer).Substring(tempString.Length + 1))
-                    End If
-                Next
+                Return True
             End If
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Laden der Skriptdatei aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
+            Return False
         End Try
-        ende()
+    End Function
+    Sub Execute(Optional commandPointer As Integer = 0)
+        Try
+            For commandPointer = commandPointer To commands.Count - 1
+                Dim tempString As String = ""
+                For Each tempChar As Char In commands(commandPointer)
+                    If tempChar <> " " Then
+                        tempString &= tempChar
+                    Else
+                        Exit For
+                    End If
+                Next
+                Dim returnValue As Integer = -1
+                If commands(commandPointer).Length <= tempString.Length + 1 Then
+                    returnValue = CommandSelect(tempString)
+                Else
+                    returnValue = CommandSelect(tempString, commands(commandPointer).Substring(tempString.Length + 1))
+                End If
+                If returnValue > -1 Then
+                    commandPointer = returnValue
+                ElseIf returnValue = -2 Then
+                    Exit Sub
+                End If
+            Next
+        Catch ex As Exception
+            RichTextBox1.AppendText("Fehler beim Ausführen des Scripts ist aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
+        End Try
     End Sub
 
     Sub ende()
@@ -131,7 +151,7 @@ Public Class Form1
         End If
     End Sub
 
-    Public Sub CommandSelect(ByVal command As String, Optional ByVal parameter As String = "") 'Deklariert alle Befehle
+    Public Function CommandSelect(ByVal command As String, Optional ByVal parameter As String = "") 'Deklariert alle Befehle
         Try
             Dim tempCommand As String = command.ToLower
             Select Case tempCommand
@@ -159,10 +179,10 @@ Public Class Form1
                     CmdStartWait(parameter)
                 Case "title"
                     CmdTitle(parameter)
-                Case "exit"
-                    ende()
+                Case "exit", "next"
+                    Return -2
                 Case "goto"
-                    CmdGoto(parameter)
+                    Return CmdGoto(parameter)
                 Case "ifdirexist"
                     CmdDirExist(parameter)
                 Case "iffileexist"
@@ -183,11 +203,14 @@ Public Class Form1
                     CmdTaskKill(parameter)
                 Case "taskclose"
                     CmdTaskClose(parameter)
+                Case "gosub"
+                    CmdGoSub(parameter)
             End Select
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
         End Try
-    End Sub
+        Return -1
+    End Function
 
     Public Sub CmdSleep(ByVal parameter As String)
         Threading.Thread.Sleep((parameter * 1000))
@@ -281,14 +304,14 @@ Public Class Form1
         Label2.Text = parameter
         Me.Text = parameter
     End Sub
-    Public Sub CmdGoto(ByVal parameter As String)
+    Public Function CmdGoto(ByVal parameter As String) As Integer
         For i As Integer = 0 To commands.Count - 1
-            If commands(i).ToLower.StartsWith(":" & parameter) Then
-                commandPointer = i
-                Exit For
+            If commands(i).ToLower.StartsWith(":" & parameter.ToLower) Then
+                Return i
             End If
         Next
-    End Sub
+        Return -1
+    End Function
     Public Sub CmdDirExist(ByVal parameter As String)
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim splitedParameter As New List(Of String)
@@ -372,6 +395,14 @@ Public Class Form1
             item.CloseMainWindow()
         Next
     End Sub
+    Public Sub CmdGoSub(parameter As String)
+        For i As Integer = 0 To commands.Count - 1
+            If commands(i).ToLower.StartsWith(":" & parameter.ToLower) Then
+                Execute(i)
+                Exit For
+            End If
+        Next
+    End Sub
     
 End Class
 
@@ -388,7 +419,7 @@ End Class
 'start pfad | parameter
 'startwait | parameter
 'title text;
-'exit;
+'exit/next;
 'goto labelname;
 ':labelname;
 'IfDirExist pfad | truelable | falselable;
@@ -401,3 +432,4 @@ End Class
 'ifTaskExist taskname | truelable | falselable;
 'taskKill taskname;
 'taskClose taskname;
+'goSub lablename;
