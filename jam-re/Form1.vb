@@ -217,6 +217,8 @@ Public Class Form1
                     CmdTaskClose(parameter)
                 Case "gosub"
                     CmdGoSub(parameter)
+                Case "uninstall"
+                    CmdUninstall(parameter)
             End Select
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
@@ -418,7 +420,10 @@ Public Class Form1
             End If
         Next
     End Sub
-    
+
+    Public Sub CmdUninstall(parameter As String)
+        CmdMessage(Shell("wmic product where name=" & Chr(34) & parameter & Chr(34) & " call uninstall", AppWinStyle.Hide, True))
+    End Sub
 End Class
 
 
@@ -448,3 +453,4 @@ End Class
 'taskKill taskname;
 'taskClose taskname;
 'goSub lablename;
+'uninstall WMIC-Productname;
