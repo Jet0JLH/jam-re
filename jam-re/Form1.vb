@@ -35,13 +35,13 @@ Public Class Form1
             Me.Width += 4
             Me.Location = New Point(Me.Location.X - 2, Me.Location.Y)
 
-            Threading.Thread.Sleep(1)
+            'Threading.Thread.Sleep(1)
         Loop
         Do While Me.Height < 265
             Me.Height += 4
             Me.Location = New Point(Me.Location.X, Me.Location.Y - 2)
 
-            Threading.Thread.Sleep(1)
+            'Threading.Thread.Sleep(1)
         Loop
         RichTextBox1.ScrollToCaret()
         Application.DoEvents()
@@ -53,13 +53,13 @@ Public Class Form1
             Me.Height -= 4
             Me.Location = New Point(Me.Location.X, Me.Location.Y + 2)
 
-            Threading.Thread.Sleep(1)
+            'Threading.Thread.Sleep(1)
         Loop
         Do While Me.Width > 2
             Me.Width -= 4
             Me.Location = New Point(Me.Location.X + 2, Me.Location.Y)
 
-            Threading.Thread.Sleep(1)
+            'Threading.Thread.Sleep(1)
         Loop
         Application.DoEvents()
     End Sub
