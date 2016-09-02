@@ -151,6 +151,18 @@ Public Class Form1
         End If
     End Sub
 
+    Public Function jumpChecker(lable As String) As Integer
+        Dim temp As String = lable.ToLower
+        If temp.StartsWith("sub:") Then
+            CmdGoSub(lable.Substring(4))
+            Return -1
+        ElseIf temp.StartsWith("goto:") Then
+            Return CmdGoto(lable.Substring(5))
+        Else
+            Return CmdGoto(lable)
+        End If
+    End Function
+
     Public Function CommandSelect(ByVal command As String, Optional ByVal parameter As String = "") 'Deklariert alle Befehle
         Try
             Dim tempCommand As String = command.ToLower
@@ -184,9 +196,9 @@ Public Class Form1
                 Case "goto"
                     Return CmdGoto(parameter)
                 Case "ifdirexist"
-                    CmdDirExist(parameter)
+                    Return CmdDirExist(parameter)
                 Case "iffileexist"
-                    CmdFileExist(parameter)
+                    Return CmdFileExist(parameter)
                 Case "shell"
                     CmdShell(parameter)
                 Case "visible"
@@ -198,7 +210,7 @@ Public Class Form1
                 Case "mkdir"
                     CmdMkDir(parameter)
                 Case "iftaskexist"
-                    CmdIfTaskExist(parameter)
+                    Return CmdIfTaskExist(parameter)
                 Case "taskkill"
                     CmdTaskKill(parameter)
                 Case "taskclose"
@@ -312,7 +324,7 @@ Public Class Form1
         Next
         Return -1
     End Function
-    Public Sub CmdDirExist(ByVal parameter As String)
+    Public Function CmdDirExist(ByVal parameter As String) As Integer
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim splitedParameter As New List(Of String)
         For Each item In parameter.Split("|")
@@ -320,15 +332,16 @@ Public Class Form1
         Next
         If splitedParameter.Count = 2 Or splitedParameter.Count = 3 Then
             If My.Computer.FileSystem.DirectoryExists(splitedParameter(0)) Then
-                CmdGoto(splitedParameter(1))
+                Return jumpChecker(splitedParameter(1))
             Else
                 If splitedParameter.Count = 3 Then
-                    CmdGoto(splitedParameter(2))
+                    Return jumpChecker(splitedParameter(2))
                 End If
             End If
         End If
-    End Sub
-    Public Sub CmdFileExist(ByVal parameter As String)
+        Return -1
+    End Function
+    Public Function CmdFileExist(ByVal parameter As String) As Integer
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim splitedParameter As New List(Of String)
         For Each item In parameter.Split("|")
@@ -336,14 +349,15 @@ Public Class Form1
         Next
         If splitedParameter.Count = 2 Or splitedParameter.Count = 3 Then
             If My.Computer.FileSystem.FileExists(splitedParameter(0)) Then
-                CmdGoto(splitedParameter(1))
+                Return jumpChecker(splitedParameter(1))
             Else
                 If splitedParameter.Count = 3 Then
-                    CmdGoto(splitedParameter(2))
+                    Return jumpChecker(splitedParameter(2))
                 End If
             End If
         End If
-    End Sub
+        Return -1
+    End Function
     Public Sub CmdShell(ByVal parameter As String)
         Shell(parameter, AppWinStyle.NormalFocus)
     End Sub
@@ -369,7 +383,7 @@ Public Class Form1
     Public Sub CmdMkDir(ByVal parameter As String)
         My.Computer.FileSystem.CreateDirectory(parameter)
     End Sub
-    Public Sub CmdIfTaskExist(parameter As String)
+    Public Function CmdIfTaskExist(parameter As String) As Integer
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim splitedParameter As New List(Of String)
         For Each item In parameter.Split("|")
@@ -377,14 +391,15 @@ Public Class Form1
         Next
         If splitedParameter.Count = 2 Or splitedParameter.Count = 3 Then
             For Each item As System.Diagnostics.Process In Process.GetProcessesByName(splitedParameter(0))
-                CmdGoto(splitedParameter(1))
-                Exit Sub
+                Return jumpChecker(splitedParameter(1))
+                Exit Function
             Next
             If splitedParameter.Count = 3 Then
-                CmdGoto(splitedParameter(2))
+                Return jumpChecker(splitedParameter(2))
             End If
         End If
-    End Sub
+        Return -1
+    End Function
     Public Sub CmdTaskKill(parameter As String)
         For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameter)
             item.Kill()
