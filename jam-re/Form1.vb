@@ -217,6 +217,8 @@ Public Class Form1
                     CmdTaskClose(parameter)
                 Case "gosub"
                     CmdGoSub(parameter)
+                Case "wget"
+                    CmdWget(parameter)
             End Select
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
@@ -476,6 +478,19 @@ Public Class Form1
             End If
         Next
     End Sub
+    Public Sub CmdWget(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 2 Then
+            My.Computer.Network.DownloadFile(splitedParameter(0), splitedParameter(1), "", "", False, 100000, True)
+        End If
+        If splitedParameter.Count = 4 Then
+            My.Computer.Network.DownloadFile(splitedParameter(0), splitedParameter(1), splitedParameter(2), splitedParameter(3), False, 100000, True)
+        End If
+    End Sub
 End Class
 
 
@@ -505,3 +520,4 @@ End Class
 'taskKill taskname;
 'taskClose taskname;
 'goSub lablename;
+'wget DownloadDatei | Speicherort;
