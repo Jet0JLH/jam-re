@@ -359,7 +359,65 @@ Public Class Form1
         Return -1
     End Function
     Public Sub CmdShell(ByVal parameter As String)
-        Shell(parameter, AppWinStyle.NormalFocus)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim tempString = parameter.ToLower
+        Dim WinStyle As Byte = 0 '0 = Normal 1 = hidden 2 = minimized 3 = maximized
+        Dim Focus As Boolean = True
+        Dim waitForExit As Boolean = False
+
+        If tempString.Contains("winstyle:normal|") Then
+            WinStyle = 0
+            tempString = tempString.Replace("winstyle:normal|", "")
+        End If
+        If tempString.Contains("winstyle:hidden|") Then
+            WinStyle = 1
+            tempString = tempString.Replace("winstyle:hidden|", "")
+        End If
+        If tempString.Contains("winstyle:minimized|") Then
+            WinStyle = 2
+            tempString = tempString.Replace("winstyle:minimized|", "")
+        End If
+        If tempString.Contains("winstyle:maximized|") Then
+            WinStyle = 3
+            tempString = tempString.Replace("winstyle:maximized|", "")
+        End If
+        If tempString.Contains("focus:true|") Then
+            Focus = True
+            tempString = tempString.Replace("focus:true|", "")
+        End If
+        If tempString.Contains("focus:false|") Then
+            Focus = False
+            tempString = tempString.Replace("focus:false|", "")
+        End If
+        If tempString.Contains("wait:true|") Then
+            waitForExit = True
+            tempString = tempString.Replace("wait:true|", "")
+        End If
+        If tempString.Contains("wait:false|") Then
+            waitForExit = False
+            tempString = tempString.Replace("wait:false|", "")
+        End If
+
+        Select Case WinStyle
+            Case 0
+                Select Case Focus
+                    Case True
+                        Shell(tempString, AppWinStyle.NormalFocus, waitForExit)
+                    Case False
+                        Shell(tempString, AppWinStyle.NormalNoFocus, waitForExit)
+                End Select
+            Case 1
+                Shell(tempString, AppWinStyle.Hide, waitForExit)
+            Case 2
+                Select Case Focus
+                    Case True
+                        Shell(tempString, AppWinStyle.MinimizedFocus, waitForExit)
+                    Case False
+                        Shell(tempString, AppWinStyle.MinimizedNoFocus, waitForExit)
+                End Select
+            Case 3
+                Shell(tempString, AppWinStyle.MaximizedFocus, waitForExit)
+        End Select
     End Sub
     Public Sub CmdVisible(ByVal parameter As String)
         parameter = parameter.ToLower
@@ -438,7 +496,7 @@ End Class
 ':labelname;
 'IfDirExist pfad | truelable | falselable;
 'IfFileExist pfad | truelable | falselable;
-'shell befehl;
+'shell winstyle:normal | focus:true | wait:false | befehl;
 'visible true/false;
 'writeFile Text > Pfad;
 'writeFileAppend Text > Pfad;
