@@ -504,7 +504,7 @@ End Class
 'moveDir quelle > ziel
 'moveFile quelle > ziel
 'start pfad | parameter
-'startwait | parameter
+'startwait pfad | parameter
 'title text;
 'exit/next;
 'goto labelname;
