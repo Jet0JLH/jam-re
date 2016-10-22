@@ -170,57 +170,91 @@ Public Class Form1
                 Case "#"
                     'Hierbei handelt es sich um ein Kommentar. Es wird nichts unternommen!
                 Case "message"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdMessage(parameter)
                 Case "sleep", "wait"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdSleep(parameter)
                 Case "deldir"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdDelDir(parameter)
                 Case "copydir"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdCopyDir(parameter)
                 Case "delfile"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdDelFile(parameter)
                 Case "copyfile"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdCopyFile(parameter)
                 Case "movedir"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdMoveDir(parameter)
                 Case "movefile"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdMoveFile(parameter)
                 Case "start"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdStart(parameter)
                 Case "startwait"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdStartWait(parameter)
                 Case "title"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdTitle(parameter)
                 Case "exit", "next"
+                    writeCommandInfoLog(tempCommand, "")
                     Return -2
                 Case "goto"
+                    writeCommandInfoLog(tempCommand, parameter)
                     Return CmdGoto(parameter)
                 Case "ifdirexist"
+                    writeCommandInfoLog(tempCommand, parameter)
                     Return CmdDirExist(parameter)
                 Case "iffileexist"
+                    writeCommandInfoLog(tempCommand, parameter)
                     Return CmdFileExist(parameter)
                 Case "shell"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdShell(parameter)
                 Case "visible"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdVisible(parameter)
                 Case "writefile"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdWriteFile(parameter, False)
                 Case "writefileappend"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdWriteFile(parameter, True)
                 Case "mkdir"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdMkDir(parameter)
                 Case "iftaskexist"
+                    writeCommandInfoLog(tempCommand, parameter)
                     Return CmdIfTaskExist(parameter)
                 Case "taskkill"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdTaskKill(parameter)
                 Case "taskclose"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdTaskClose(parameter)
                 Case "gosub"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdGoSub(parameter)
                 Case "wget"
+                    writeCommandInfoLog(tempCommand, parameter)
                     CmdWget(parameter)
+                Case "log"
+                    CmdLog(parameter)
+                Case Else
+                    If tempCommand.StartsWith(":") = True Then
+                        writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
+                    Else
+                        writeCommandErrorLog(command, parameter, "Befehl unbekannt!")
+                    End If
             End Select
         Catch ex As Exception
+            writeCommandErrorLog(command, parameter, ex.ToString)
             RichTextBox1.AppendText("Fehler beim Ausführen von Command: " & command & " mit dem Parameter: " & parameter & " aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
         End Try
         Return -1
@@ -235,6 +269,8 @@ Public Class Form1
     Public Sub CmdDelDir(ByVal parameter As String)
         If My.Computer.FileSystem.DirectoryExists(parameter) Then
             My.Computer.FileSystem.DeleteDirectory(parameter, FileIO.DeleteDirectoryOption.DeleteAllContents)
+        Else
+            writeWarningLog("Ordner " & parameter & " existiert nicht.")
         End If
     End Sub
     Public Sub CmdCopyDir(ByVal parameter As String)
@@ -246,12 +282,18 @@ Public Class Form1
             Next
             If My.Computer.FileSystem.DirectoryExists(tempList(0)) Then
                 My.Computer.FileSystem.CopyDirectory(tempList(0), tempList(1), True)
+            Else
+                writeErrorLog("Ordner " & tempList(0) & " ist nicht vorhanden.")
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl CopyDir mit dem Parameter " & parameter)
         End If
     End Sub
     Public Sub CmdDelFile(ByVal parameter As String)
         If My.Computer.FileSystem.FileExists(parameter) Then
             My.Computer.FileSystem.DeleteFile(parameter)
+        Else
+            writeWarningLog("Datei " & parameter & " existiert nicht.")
         End If
     End Sub
     Public Sub CmdCopyFile(ByVal parameter As String)
@@ -263,7 +305,11 @@ Public Class Form1
             Next
             If My.Computer.FileSystem.FileExists(tempList(0)) Then
                 My.Computer.FileSystem.CopyFile(tempList(0), tempList(1), True)
+            Else
+                writeErrorLog("Datei " & tempList(0) & " ist nicht vorhanden.")
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl CopyFile mit dem Parameter " & parameter)
         End If
     End Sub
     Public Sub CmdMoveDir(ByVal parameter As String)
@@ -275,7 +321,11 @@ Public Class Form1
             Next
             If My.Computer.FileSystem.DirectoryExists(tempList(0)) Then
                 My.Computer.FileSystem.MoveDirectory(tempList(0), tempList(1), FileIO.UIOption.AllDialogs, FileIO.UICancelOption.DoNothing)
+            Else
+                writeErrorLog("Ordner " & tempList(0) & " ist nicht vorhanden.")
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl MoveDir mit dem Parameter " & parameter)
         End If
     End Sub
     Public Sub CmdMoveFile(ByVal parameter As String)
@@ -287,7 +337,11 @@ Public Class Form1
             Next
             If My.Computer.FileSystem.FileExists(tempList(0)) Then
                 My.Computer.FileSystem.MoveFile(tempList(0), tempList(1), FileIO.UIOption.AllDialogs, FileIO.UICancelOption.DoNothing)
+            Else
+                writeErrorLog("Datei " & tempList(0) & " ist nicht vorhanden.")
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl MoveFile mit dem Parameter " & parameter)
         End If
     End Sub
     Public Sub CmdStart(ByVal parameter As String)
@@ -324,6 +378,7 @@ Public Class Form1
                 Return i
             End If
         Next
+        writeWarningLog("Lable " & parameter & " wurde nicht gefunden.")
         Return -1
     End Function
     Public Function CmdDirExist(ByVal parameter As String) As Integer
@@ -340,6 +395,8 @@ Public Class Form1
                     Return jumpChecker(splitedParameter(2))
                 End If
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl IfDirExist mit dem Parameter " & parameter)
         End If
         Return -1
     End Function
@@ -357,6 +414,8 @@ Public Class Form1
                     Return jumpChecker(splitedParameter(2))
                 End If
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl IfFileExist mit dem Parameter " & parameter)
         End If
         Return -1
     End Function
@@ -438,6 +497,8 @@ Public Class Form1
         Next
         If tempList.Count = 2 Then
             My.Computer.FileSystem.WriteAllText(tempList(1), tempList(0), append)
+        Else
+            writeErrorLog("Syntaxfehler in Befehl writeFile mit dem Parameter " & parameter)
         End If
     End Sub
     Public Sub CmdMkDir(ByVal parameter As String)
@@ -457,17 +518,21 @@ Public Class Form1
             If splitedParameter.Count = 3 Then
                 Return jumpChecker(splitedParameter(2))
             End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl IfTaskExist mit dem Parameter " & parameter)
         End If
         Return -1
     End Function
     Public Sub CmdTaskKill(parameter As String)
         For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameter)
             item.Kill()
+            writeInfoLog("Prozess " & item.ProcessName & " mit der ID " & item.Id & " wurde terminiert.")
         Next
     End Sub
     Public Sub CmdTaskClose(parameter As String)
         For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameter)
             item.CloseMainWindow()
+            writeInfoLog("Prozess " & item.ProcessName & " mit der ID " & item.Id & " wurde zum Beenden aufgefordert.")
         Next
     End Sub
     Public Sub CmdGoSub(parameter As String)
@@ -486,9 +551,28 @@ Public Class Form1
         Next
         If splitedParameter.Count = 2 Then
             My.Computer.Network.DownloadFile(splitedParameter(0), splitedParameter(1), "", "", False, 100000, True)
-        End If
-        If splitedParameter.Count = 4 Then
+        ElseIf splitedParameter.Count = 4 Then
             My.Computer.Network.DownloadFile(splitedParameter(0), splitedParameter(1), splitedParameter(2), splitedParameter(3), False, 100000, True)
+        Else
+            writeErrorLog("Syntaxfehler in Befehl Wget mit dem Parameter " & parameter)
+        End If
+    End Sub
+    Public Sub CmdLog(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If (splitedParameter.Count = 1 And splitedParameter(0).ToLower = "false") Or splitedParameter.Count = 2 Then
+            If splitedParameter(0).ToLower = "false" Then
+                doLog = False
+                log = ""
+            ElseIf splitedParameter(0).ToLower = "true" Then
+                doLog = True
+                log = splitedParameter(1)
+            End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl Log mit dem Parameter " & parameter)
         End If
     End Sub
 End Class
@@ -521,3 +605,4 @@ End Class
 'taskClose taskname;
 'goSub lablename;
 'wget DownloadDatei | Speicherort;
+'log true/false | Pfad_der_Logdatei;
