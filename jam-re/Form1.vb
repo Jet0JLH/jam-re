@@ -248,6 +248,8 @@ Public Class Form1
                     CmdLog(parameter)
                 Case "set"
                     CmdSet(parameter)
+                Case "readfile"
+                    CmdReadFile(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -590,6 +592,22 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl Set mit dem Parameter " & parameter)
         End If
     End Sub
+    Public Sub CmdReadFile(parameter As String)
+        parameter = parameter.Replace(" >", ">").Replace("> ", ">")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split(">")
+            splitedParameter.Add(item)
+        Next
+        If (splitedParameter.Count = 2) Then
+            If My.Computer.FileSystem.FileExists(splitedParameter(0)) Then
+                setVar(splitedParameter(1), My.Computer.FileSystem.ReadAllText(splitedParameter(0)))
+            Else
+                writeErrorLog("Befehl ReadFile kann die Datei " & splitedParameter(0) & " nicht finden.")
+            End If
+        Else
+            writeErrorLog("Syntaxfehler in Befehl ReadFile mit dem Parameter " & parameter)
+        End If
+    End Sub
 End Class
 
 
@@ -622,3 +640,4 @@ End Class
 'wget DownloadDatei | Speicherort;
 'log true/false | Pfad_der_Logdatei;
 'set varName | varValue;
+'readFile File > varName;
