@@ -118,9 +118,9 @@ Public Class Form1
                 Next
                 Dim returnValue As Integer = -1
                 If commands(commandPointer).Length <= tempString.Length + 1 Then
-                    returnValue = CommandSelect(tempString)
+                    returnValue = CommandSelect(replaceVar(tempString))
                 Else
-                    returnValue = CommandSelect(tempString, commands(commandPointer).Substring(tempString.Length + 1))
+                    returnValue = CommandSelect(replaceVar(tempString), replaceVar(commands(commandPointer).Substring(tempString.Length + 1)))
                 End If
                 If returnValue > -1 Then
                     commandPointer = returnValue
@@ -246,6 +246,8 @@ Public Class Form1
                     CmdWget(parameter)
                 Case "log"
                     CmdLog(parameter)
+                Case "set"
+                    CmdSet(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -575,6 +577,19 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl Log mit dem Parameter " & parameter)
         End If
     End Sub
+    Public Sub CmdSet(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If (splitedParameter.Count = 2) Then
+
+            setVar(splitedParameter(0), splitedParameter(1))
+        Else
+            writeErrorLog("Syntaxfehler in Befehl Set mit dem Parameter " & parameter)
+        End If
+    End Sub
 End Class
 
 
@@ -606,3 +621,4 @@ End Class
 'goSub lablename;
 'wget DownloadDatei | Speicherort;
 'log true/false | Pfad_der_Logdatei;
+'set varName | varValue;
