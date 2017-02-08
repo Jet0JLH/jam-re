@@ -251,7 +251,7 @@ Public Class Form1
                 Case "readfile"
                     CmdReadFile(parameter)
                 Case "ifstringequal"
-                    CmdIfStringEqual(parameter)
+                    Return CmdIfStringEqual(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -380,7 +380,7 @@ Public Class Form1
     End Sub
     Public Function CmdGoto(ByVal parameter As String) As Integer
         For i As Integer = 0 To commands.Count - 1
-            If commands(i).ToLower.StartsWith(":" & parameter.ToLower) Then
+            If commands(i).ToLower = ":" & parameter.ToLower Then
                 Return i
             End If
         Next
