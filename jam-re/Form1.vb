@@ -252,6 +252,8 @@ Public Class Form1
                     CmdReadFile(parameter)
                 Case "ifstringequal"
                     Return CmdIfStringEqual(parameter)
+                Case "ifstringcontain"
+                    Return CmdIfStringContain(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -628,6 +630,24 @@ Public Class Form1
         End If
         Return -1
     End Function
+    Public Function CmdIfStringContain(parameter As String) As Integer
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 3 Or splitedParameter.Count = 4 Then
+            If splitedParameter(0).ToLower.Contains(splitedParameter(1).ToLower) Then
+                writeInfoLog("String " & splitedParameter(0) & " stimmt überein. Es wird zu Lable " & splitedParameter(2) & " gesprungen.")
+                Return jumpChecker(splitedParameter(2))
+                Exit Function
+            ElseIf splitedParameter.Count = 4 Then
+                writeInfoLog("String " & splitedParameter(0) & " stimmt mit " & splitedParameter(1) & " nicht überein. Es wird zu Lable " & splitedParameter(3) & " gesprungen.")
+                Return jumpChecker(splitedParameter(3))
+            End If
+        End If
+        Return -1
+    End Function
 End Class
 
 
@@ -661,4 +681,5 @@ End Class
 'log true/false | Pfad_der_Logdatei;
 'set varName | varValue;
 'readFile File > varName;
-'ifStringEqual string1 | string2 | truelable | falselable
+'ifStringEqual string1 | string2 | truelable | falselable;
+'ifStringContain zuPrüfendenString | enthälltString | truelable | falselable;
