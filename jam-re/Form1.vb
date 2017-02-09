@@ -254,6 +254,9 @@ Public Class Form1
                     Return CmdIfStringEqual(parameter)
                 Case "ifstringcontain"
                     Return CmdIfStringContain(parameter)
+                Case "calculate"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    CmdCalculate(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -648,6 +651,23 @@ Public Class Form1
         End If
         Return -1
     End Function
+
+    Public Sub CmdCalculate(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 2 Then
+            Try
+                setVar(splitedParameter(0), CCalculator.Calc(splitedParameter(1)))
+            Catch ex As Exception
+                writeErrorLog("Math Error in Calculate Befehl" & vbCrLf & ex.ToString)
+            End Try
+        Else
+            writeErrorLog("Syntaxfehler in Befehl Calculate mit dem Parameter " & parameter)
+        End If
+    End Sub
 End Class
 
 
@@ -683,3 +703,4 @@ End Class
 'readFile File > varName;
 'ifStringEqual string1 | string2 | truelable | falselable;
 'ifStringContain zuPrüfendenString | enthälltString | truelable | falselable;
+'calculate ergebniss | rechenstring;
