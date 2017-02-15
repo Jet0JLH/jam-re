@@ -8,7 +8,8 @@ Public Class CCalculator
 
     Public Shared Function Calc(expr As String) As Double
         If expr.Length = 0 Then Return 0.0
-        expr = expr.Replace(",", ".")
+        If expr.ToLower.Contains("system.") Or expr.ToLower.Contains("microsoft.") Or expr.ToLower.Contains("jam_re.") Then Return 0.0
+        'expr = expr.Replace(",", ".")
         Dim opt As New CompilerParameters(Nothing, String.Empty, False)
         opt.GenerateExecutable = False
         opt.GenerateInMemory = True
