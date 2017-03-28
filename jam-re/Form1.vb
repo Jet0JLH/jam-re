@@ -1,7 +1,7 @@
 ﻿Imports System.Drawing.Drawing2D
 Public Class Form1
     Dim ready As Boolean = False
-    Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor
+    Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build
     Public commands As New List(Of String)
     Dim Script As String = ""
 
