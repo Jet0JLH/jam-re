@@ -257,6 +257,12 @@ Public Class Form1
                 Case "calculate"
                     writeCommandInfoLog(tempCommand, parameter)
                     CmdCalculate(parameter)
+                Case "substring"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    CmdSubstring(parameter)
+                Case "replacestring"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    CmdReplaceString(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -668,6 +674,42 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl Calculate mit dem Parameter " & parameter)
         End If
     End Sub
+    Public Sub CmdSubstring(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 3 Or splitedParameter.Count = 4 Then
+            Try
+                If splitedParameter.Count = 3 Then
+                    setVar(splitedParameter(0), splitedParameter(1).Substring(splitedParameter(2)))
+                Else
+                    setVar(splitedParameter(0), splitedParameter(1).Substring(splitedParameter(2), splitedParameter(3)))
+                End If
+            Catch ex As Exception
+                writeErrorLog("Fehler bei Substring" & vbCrLf & ex.ToString)
+            End Try
+        Else
+            writeErrorLog("Syntaxfehler in Befehl Substring mit dem Parameter " & parameter)
+        End If
+    End Sub
+    Public Sub CmdReplaceString(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 4 Then
+            Try
+                setVar(splitedParameter(0), splitedParameter(1).Replace(splitedParameter(2), splitedParameter(3)))
+            Catch ex As Exception
+                writeErrorLog("Fehler bei ReplaceString" & vbCrLf & ex.ToString)
+            End Try
+        Else
+            writeErrorLog("Syntaxfehler in Befehl ReplaceString mit dem Parameter " & parameter)
+        End If
+    End Sub
 End Class
 
 
@@ -703,4 +745,6 @@ End Class
 'readFile File > varName;
 'ifStringEqual string1 | string2 | truelable | falselable;
 'ifStringContain zuPrüfendenString | enthälltString | truelable | falselable;
-'calculate ergebniss | rechenstring;
+'calculate ergebnis | rechenstring;
+'substring ergebnis | string | startindex | länge;
+'replaceString ergebnis | string | oldChar | newChar;
