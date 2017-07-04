@@ -263,6 +263,12 @@ Public Class Form1
                 Case "replacestring"
                     writeCommandInfoLog(tempCommand, parameter)
                     CmdReplaceString(parameter)
+                Case "setregvalue"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    CmdSetRegValue(parameter)
+                Case "getregvalue"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    CmdGetRegValue(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -710,6 +716,59 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl ReplaceString mit dem Parameter " & parameter)
         End If
     End Sub
+    Public Sub CmdSetRegValue(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 3 Or splitedParameter.Count = 4 Then
+            Try
+                If splitedParameter.Count = 3 Then
+                    My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2))
+                Else
+                    Select Case splitedParameter(3).ToLower
+                        Case "dword"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.DWord)
+                        Case "binary"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.Binary)
+                        Case "expandstring"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.ExpandString)
+                        Case "multistring"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.MultiString)
+                        Case "qword"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.QWord)
+                        Case "string"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.String)
+                        Case "unknown"
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.Unknown)
+                        Case Else
+                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2))
+                    End Select
+                End If
+            Catch ex As Exception
+                writeErrorLog("Fehler bei SetRegValue" & vbCrLf & ex.ToString)
+            End Try
+        Else
+            writeErrorLog("Syntaxfehler in Befehl SetRegValue mit dem Parameter " & parameter)
+        End If
+    End Sub
+    Public Sub cmdGetRegValue(parameter As String)
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 3 Then
+            Try
+                setVar(splitedParameter(2), My.Computer.Registry.GetValue(splitedParameter(0), splitedParameter(1), ""))
+            Catch ex As Exception
+                writeErrorLog("Fehler bei GetRegValue" & vbCrLf & ex.ToString)
+            End Try
+        Else
+            writeErrorLog("Syntaxfehler in Befehl GetRegValue mit dem Parameter " & parameter)
+        End If
+    End Sub
 End Class
 
 
@@ -748,3 +807,5 @@ End Class
 'calculate ergebnis | rechenstring;
 'substring ergebnis | string | startindex | länge;
 'replaceString ergebnis | string | oldChar | newChar;
+'setRegValue RegPath | EntryName | EntryValue | EntryType;
+'getRegValue RegPath | EntryName | varName;
