@@ -824,7 +824,7 @@ Public Class Form1
                 Hive = parameter.Substring(0, parameter.IndexOf("/"))
                 Key = parameter.Substring(parameter.IndexOf("/") + 1)
             Else
-                writeErrorLog("Syntaxfehler in Befehl CreateRegKey mit dem Parameter " & parameter)
+                writeErrorLog("Syntaxfehler in Befehl DelRegKey mit dem Parameter " & parameter)
                 Exit Sub
             End If
             Select Case Hive.ToLower
@@ -843,10 +843,10 @@ Public Class Form1
                 Case "hkey_performance_data", "hkpd"
                     My.Computer.Registry.PerformanceData.DeleteSubKeyTree(Key)
                 Case Else
-                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl CreateRegKey")
+                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl DelRegKey")
             End Select
         Catch ex As Exception
-            writeErrorLog("Fehler bei CreateRegKey" & vbCrLf & ex.ToString)
+            writeErrorLog("Fehler bei DelRegKey" & vbCrLf & ex.ToString)
         End Try
 
     End Sub
