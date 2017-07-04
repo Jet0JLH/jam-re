@@ -268,7 +268,13 @@ Public Class Form1
                     CmdSetRegValue(parameter)
                 Case "getregvalue"
                     writeCommandInfoLog(tempCommand, parameter)
-                    CmdGetRegValue(parameter)
+                    cmdGetRegValue(parameter)
+                Case "createregkey"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdCreateRegKey(parameter)
+                Case "delregkey"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdDelRegKey(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -769,6 +775,81 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl GetRegValue mit dem Parameter " & parameter)
         End If
     End Sub
+    Public Sub cmdCreateRegKey(parameter As String)
+        Try
+            Dim Hive As String = ""
+            Dim Key As String = ""
+            If parameter.Contains("\") Then
+                Hive = parameter.Substring(0, parameter.IndexOf("\"))
+                Key = parameter.Substring(parameter.IndexOf("\") + 1)
+            ElseIf parameter.Contains("/") Then
+                Hive = parameter.Substring(0, parameter.IndexOf("/"))
+                Key = parameter.Substring(parameter.IndexOf("/") + 1)
+            Else
+                writeErrorLog("Syntaxfehler in Befehl CreateRegKey mit dem Parameter " & parameter)
+                Exit Sub
+            End If
+            Select Case Hive.ToLower
+                Case "hkey_current_user", "hkcu"
+                    My.Computer.Registry.CurrentUser.CreateSubKey(Key)
+                Case "hkey_classes_root", "hkcr"
+                    My.Computer.Registry.ClassesRoot.CreateSubKey(Key)
+                Case "hkey_local_maschine", "hklm"
+                    My.Computer.Registry.LocalMachine.CreateSubKey(Key)
+                Case "hkey_users", "hku"
+                    My.Computer.Registry.Users.CreateSubKey(Key)
+                Case "hkey_current_config", "hkcc"
+                    My.Computer.Registry.CurrentConfig.CreateSubKey(Key)
+                Case "hkey_dyndata", "hkd"
+                    My.Computer.Registry.DynData.CreateSubKey(Key)
+                Case "hkey_performance_data", "hkpd"
+                    My.Computer.Registry.PerformanceData.CreateSubKey(Key)
+                Case Else
+                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl CreateRegKey")
+            End Select
+        Catch ex As Exception
+            writeErrorLog("Fehler bei CreateRegKey" & vbCrLf & ex.ToString)
+        End Try
+        
+    End Sub
+
+    Public Sub cmdDelRegKey(parameter As String)
+        Try
+            Dim Hive As String = ""
+            Dim Key As String = ""
+            If parameter.Contains("\") Then
+                Hive = parameter.Substring(0, parameter.IndexOf("\"))
+                Key = parameter.Substring(parameter.IndexOf("\") + 1)
+            ElseIf parameter.Contains("/") Then
+                Hive = parameter.Substring(0, parameter.IndexOf("/"))
+                Key = parameter.Substring(parameter.IndexOf("/") + 1)
+            Else
+                writeErrorLog("Syntaxfehler in Befehl CreateRegKey mit dem Parameter " & parameter)
+                Exit Sub
+            End If
+            Select Case Hive.ToLower
+                Case "hkey_current_user", "hkcu"
+                    My.Computer.Registry.CurrentUser.DeleteSubKeyTree(Key)
+                Case "hkey_classes_root", "hkcr"
+                    My.Computer.Registry.ClassesRoot.DeleteSubKeyTree(Key)
+                Case "hkey_local_maschine", "hklm"
+                    My.Computer.Registry.LocalMachine.DeleteSubKeyTree(Key)
+                Case "hkey_users", "hku"
+                    My.Computer.Registry.Users.DeleteSubKeyTree(Key)
+                Case "hkey_current_config", "hkcc"
+                    My.Computer.Registry.CurrentConfig.DeleteSubKeyTree(Key)
+                Case "hkey_dyndata", "hkd"
+                    My.Computer.Registry.DynData.DeleteSubKeyTree(Key)
+                Case "hkey_performance_data", "hkpd"
+                    My.Computer.Registry.PerformanceData.DeleteSubKeyTree(Key)
+                Case Else
+                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl CreateRegKey")
+            End Select
+        Catch ex As Exception
+            writeErrorLog("Fehler bei CreateRegKey" & vbCrLf & ex.ToString)
+        End Try
+
+    End Sub
 End Class
 
 
@@ -809,3 +890,5 @@ End Class
 'replaceString ergebnis | string | oldChar | newChar;
 'setRegValue RegPath | EntryName | EntryValue | EntryType;
 'getRegValue RegPath | EntryName | varName;
+'createRegKey RegPath;
+'delRegKey RegPath;
