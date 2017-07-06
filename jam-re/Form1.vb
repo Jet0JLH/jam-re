@@ -277,7 +277,7 @@ Public Class Form1
                     cmdDelRegKey(parameter)
                 Case "delregentry"
                     writeCommandInfoLog(tempCommand, parameter)
-                    cmdDelRegEntry(parameter)
+                    cmdDelRegValue(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -802,7 +802,7 @@ Public Class Form1
         End Try
 
     End Sub
-    Public Sub cmdDelRegEntry(parameter)
+    Public Sub cmdDelRegValue(parameter)
         Try
             parameter = parameter.Replace(" |", "|").Replace("| ", "|")
             Dim splitedParameter As New List(Of String)
@@ -870,4 +870,4 @@ End Class
 'getRegValue RegPath | EntryName | varName;
 'createRegKey RegPath;
 'delRegKey RegPath;
-'delRegEntry RegPath | EntryName;
+'delRegValue RegPath | EntryName;
