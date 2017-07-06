@@ -275,7 +275,7 @@ Public Class Form1
                 Case "delregkey"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdDelRegKey(parameter)
-                Case "delregentry"
+                Case "delregvalue"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdDelRegValue(parameter)
                 Case Else
