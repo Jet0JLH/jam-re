@@ -275,6 +275,9 @@ Public Class Form1
                 Case "delregkey"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdDelRegKey(parameter)
+                Case "delregentry"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdDelRegEntry(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -850,6 +853,49 @@ Public Class Form1
         End Try
 
     End Sub
+    Public Sub cmdDelRegEntry(parameter)
+        Try
+            parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+            Dim splitedParameter As New List(Of String)
+            For Each item In parameter.Split("|")
+                splitedParameter.Add(item)
+            Next
+            If splitedParameter.Count = 2 Then
+                Dim Hive As String = ""
+                Dim Key As String = ""
+                If splitedParameter(0).Contains("\") Then
+                    Hive = splitedParameter(0).Substring(0, parameter.IndexOf("\"))
+                    Key = splitedParameter(0).Substring(parameter.IndexOf("\") + 1)
+                ElseIf splitedParameter(0).Contains("/") Then
+                    Hive = splitedParameter(0).Substring(0, parameter.IndexOf("/"))
+                    Key = splitedParameter(0).Substring(parameter.IndexOf("/") + 1)
+                Else
+                    writeErrorLog("Syntaxfehler in Befehl DelRegEntry mit dem Parameter " & parameter)
+                    Exit Sub
+                End If
+                Select Case Hive.ToLower
+                    Case "hkey_current_user", "hkcu"
+                        My.Computer.Registry.CurrentUser.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_classes_root", "hkcr"
+                        My.Computer.Registry.ClassesRoot.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_local_maschine", "hklm"
+                        My.Computer.Registry.LocalMachine.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_users", "hku"
+                        My.Computer.Registry.Users.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_current_config", "hkcc"
+                        My.Computer.Registry.CurrentConfig.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_dyndata", "hkd"
+                        My.Computer.Registry.DynData.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case "hkey_performance_data", "hkpd"
+                        My.Computer.Registry.PerformanceData.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
+                    Case Else
+                        writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl DelRegEntry")
+                End Select
+            End If
+        Catch ex As Exception
+            writeErrorLog("Fehler bei DelRegEntry" & vbCrLf & ex.ToString)
+        End Try
+    End Sub
 End Class
 
 
@@ -892,3 +938,4 @@ End Class
 'getRegValue RegPath | EntryName | varName;
 'createRegKey RegPath;
 'delRegKey RegPath;
+'delRegEntry RegPath | EntryName;
