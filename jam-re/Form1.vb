@@ -736,24 +736,7 @@ Public Class Form1
                 If splitedParameter.Count = 3 Then
                     My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2))
                 Else
-                    Select Case splitedParameter(3).ToLower
-                        Case "dword"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.DWord)
-                        Case "binary"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.Binary)
-                        Case "expandstring"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.ExpandString)
-                        Case "multistring"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.MultiString)
-                        Case "qword"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.QWord)
-                        Case "string"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.String)
-                        Case "unknown"
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), Microsoft.Win32.RegistryValueKind.Unknown)
-                        Case Else
-                            My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2))
-                    End Select
+                    My.Computer.Registry.SetValue(splitedParameter(0), splitedParameter(1), splitedParameter(2), getRegValueKind(splitedParameter(3)))
                 End If
             Catch ex As Exception
                 writeErrorLog("Fehler bei SetRegValue" & vbCrLf & ex.ToString)
@@ -792,24 +775,7 @@ Public Class Form1
                 writeErrorLog("Syntaxfehler in Befehl CreateRegKey mit dem Parameter " & parameter)
                 Exit Sub
             End If
-            Select Case Hive.ToLower
-                Case "hkey_current_user", "hkcu"
-                    My.Computer.Registry.CurrentUser.CreateSubKey(Key)
-                Case "hkey_classes_root", "hkcr"
-                    My.Computer.Registry.ClassesRoot.CreateSubKey(Key)
-                Case "hkey_local_maschine", "hklm"
-                    My.Computer.Registry.LocalMachine.CreateSubKey(Key)
-                Case "hkey_users", "hku"
-                    My.Computer.Registry.Users.CreateSubKey(Key)
-                Case "hkey_current_config", "hkcc"
-                    My.Computer.Registry.CurrentConfig.CreateSubKey(Key)
-                Case "hkey_dyndata", "hkd"
-                    My.Computer.Registry.DynData.CreateSubKey(Key)
-                Case "hkey_performance_data", "hkpd"
-                    My.Computer.Registry.PerformanceData.CreateSubKey(Key)
-                Case Else
-                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl CreateRegKey")
-            End Select
+            getHive(Hive).CreateSubKey(Key)
         Catch ex As Exception
             writeErrorLog("Fehler bei CreateRegKey" & vbCrLf & ex.ToString)
         End Try
@@ -830,24 +796,7 @@ Public Class Form1
                 writeErrorLog("Syntaxfehler in Befehl DelRegKey mit dem Parameter " & parameter)
                 Exit Sub
             End If
-            Select Case Hive.ToLower
-                Case "hkey_current_user", "hkcu"
-                    My.Computer.Registry.CurrentUser.DeleteSubKeyTree(Key)
-                Case "hkey_classes_root", "hkcr"
-                    My.Computer.Registry.ClassesRoot.DeleteSubKeyTree(Key)
-                Case "hkey_local_maschine", "hklm"
-                    My.Computer.Registry.LocalMachine.DeleteSubKeyTree(Key)
-                Case "hkey_users", "hku"
-                    My.Computer.Registry.Users.DeleteSubKeyTree(Key)
-                Case "hkey_current_config", "hkcc"
-                    My.Computer.Registry.CurrentConfig.DeleteSubKeyTree(Key)
-                Case "hkey_dyndata", "hkd"
-                    My.Computer.Registry.DynData.DeleteSubKeyTree(Key)
-                Case "hkey_performance_data", "hkpd"
-                    My.Computer.Registry.PerformanceData.DeleteSubKeyTree(Key)
-                Case Else
-                    writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl DelRegKey")
-            End Select
+            getHive(Hive).DeleteSubKeyTree(Key)
         Catch ex As Exception
             writeErrorLog("Fehler bei DelRegKey" & vbCrLf & ex.ToString)
         End Try
@@ -873,24 +822,7 @@ Public Class Form1
                     writeErrorLog("Syntaxfehler in Befehl DelRegEntry mit dem Parameter " & parameter)
                     Exit Sub
                 End If
-                Select Case Hive.ToLower
-                    Case "hkey_current_user", "hkcu"
-                        My.Computer.Registry.CurrentUser.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_classes_root", "hkcr"
-                        My.Computer.Registry.ClassesRoot.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_local_maschine", "hklm"
-                        My.Computer.Registry.LocalMachine.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_users", "hku"
-                        My.Computer.Registry.Users.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_current_config", "hkcc"
-                        My.Computer.Registry.CurrentConfig.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_dyndata", "hkd"
-                        My.Computer.Registry.DynData.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case "hkey_performance_data", "hkpd"
-                        My.Computer.Registry.PerformanceData.OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
-                    Case Else
-                        writeErrorLog("Kein gültiger Regestry Hive angegeben imd Befehl DelRegEntry")
-                End Select
+                getHive(Hive).OpenSubKey(Key, True).DeleteValue(splitedParameter(1))
             End If
         Catch ex As Exception
             writeErrorLog("Fehler bei DelRegEntry" & vbCrLf & ex.ToString)
