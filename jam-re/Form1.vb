@@ -4,6 +4,7 @@ Public Class Form1
     Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build
     Public commands As New List(Of String)
     Dim Script As String = ""
+    Dim includes As Byte = 0
 
     Dim openThread As New Threading.Thread(AddressOf openForm)
     Private Sub Form1_Shown(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Shown
@@ -71,35 +72,53 @@ Public Class Form1
         ende()
     End Sub
     Function loadScript() As Boolean
+        If Environment.GetCommandLineArgs.Count <= 1 Then
+            RichTextBox1.AppendText(vbCrLf & "Es wurde keine Datei übergeben!")
+            ende()
+            Return False
+        Else
+            Return loadScripts(Environment.GetCommandLineArgs(1))
+        End If
+    End Function
+    Function loadScripts(file As String) As Boolean
+        If includes < 255 Then
+            includes += 1
+        Else
+            RichTextBox1.AppendText("Über 255 Includes. Vermutlich ein Loop. Daher werden keine weiteren Includes gestattet.")
+            writeErrorLog("Über 255 Includes. Vermutlich ein Loop. Daher werden keine weiteren Includes gestattet.")
+            Return False
+        End If
         Script = ""
         Try
-            If Environment.GetCommandLineArgs.Count <= 1 Then
-                RichTextBox1.AppendText(vbCrLf & "Es wurde keine Datei übergeben!")
-                ende()
-                Return False
-            Else
-                Using sr As System.IO.StreamReader = New System.IO.StreamReader(Environment.GetCommandLineArgs(1), System.Text.Encoding.Default)
-                    Script = sr.ReadToEnd.ToString
-                    sr.Close()
-                End Using
-                Script = Script.Replace(Chr(10), "").Replace(Chr(13), "").Replace(vbTab, "")
+            Using sr As System.IO.StreamReader = New System.IO.StreamReader(file, System.Text.Encoding.Default)
+                Script = sr.ReadToEnd.ToString
+                sr.Close()
+            End Using
+            Script = Script.Replace(Chr(10), "").Replace(Chr(13), "").Replace(vbTab, "")
 
-                'Prüfen ob weitere Parameter übergeben wurde
-                If Environment.GetCommandLineArgs.Count >= 3 Then
-                    For i As Integer = 2 To Environment.GetCommandLineArgs.Count - 1
-                        Script = Script.Replace("%" & i - 1 & "%", Environment.GetCommandLineArgs(i))
-                    Next
-                End If
-                'Ersetze weitere Variablen
-                Script = Script.Replace("%_br%", Chr(13) & Chr(10))
-                Script = Environment.ExpandEnvironmentVariables(Script)
-
-
-                For Each item As String In Script.Split(";")
-                    commands.Add(item)
+            'Prüfen ob weitere Parameter übergeben wurde
+            If Environment.GetCommandLineArgs.Count >= 3 Then
+                For i As Integer = 2 To Environment.GetCommandLineArgs.Count - 1
+                    Script = Script.Replace("%" & i - 1 & "%", Environment.GetCommandLineArgs(i))
                 Next
-                Return True
             End If
+            'Ersetze weitere Variablen
+            Script = Script.Replace("%_br%", Chr(13) & Chr(10))
+            Script = Environment.ExpandEnvironmentVariables(Script)
+
+
+            For Each item As String In Script.Split(";")
+                If item.ToLower.StartsWith("include ") Then
+                    Try
+                        loadScripts(item.Substring(8))
+                    Catch ex As Exception
+                        RichTextBox1.AppendText("Fehler beim Include von " & item & vbCrLf & ex.ToString)
+                    End Try
+                Else
+                    commands.Add(item)
+                End If
+            Next
+            Return True
         Catch ex As Exception
             RichTextBox1.AppendText("Fehler beim Laden der Skriptdatei aufgetreten!" & vbCrLf & vbCrLf & ex.ToString)
             Return False
