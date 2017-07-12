@@ -779,7 +779,7 @@ Public Class Form1
         Catch ex As Exception
             writeErrorLog("Fehler bei CreateRegKey" & vbCrLf & ex.ToString)
         End Try
-        
+
     End Sub
 
     Public Sub cmdDelRegKey(parameter As String)
@@ -802,7 +802,7 @@ Public Class Form1
         End Try
 
     End Sub
-    Public Sub cmdDelRegValue(parameter)
+    Public Sub cmdDelRegValue(parameter As String)
         Try
             parameter = parameter.Replace(" |", "|").Replace("| ", "|")
             Dim splitedParameter As New List(Of String)
