@@ -44,4 +44,25 @@
             End Select
         End Get
     End Property
+    Function humanReadable(value As Double) As String
+        Dim count As Byte = 0
+        While value > 1024
+            count += 1
+            value = value / 1024
+        End While
+        Select Case count
+            Case 0
+                Return Math.Round(value, 2) & " Byte"
+            Case 1
+                Return Math.Round(value, 2) & " KB"
+            Case 2
+                Return Math.Round(value, 2) & " MB"
+            Case 3
+                Return Math.Round(value, 2) & " GB"
+            Case 4
+                Return Math.Round(value, 2) & " TB"
+            Case Else
+                Return Math.Round(value, 2) & " PB"
+        End Select
+    End Function
 End Module
