@@ -44,7 +44,7 @@
             End Select
         End Get
     End Property
-    Function humanReadable(value As Double) As String
+    Public Function humanReadable(value As Double) As String
         Dim count As Byte = 0
         While value > 1024
             count += 1
@@ -65,4 +65,25 @@
                 Return Math.Round(value, 2) & " PB"
         End Select
     End Function
+    Public Sub generateProgressbar(value As Byte)
+        With Form1.RichTextBox1
+            If .Lines.Count > 3 Then
+                .Select(.GetFirstCharIndexFromLine(.Lines.Count - 3), .GetFirstCharIndexFromLine(.Lines.Count - 1))
+                .SelectedText = ""
+            Else
+                .Clear()
+            End If
+            Dim steps As Byte = 0.4 * value
+            .AppendText("╔════════════════════════════════════════╗" & vbCrLf & "║")
+            For i As Byte = 1 To steps
+                .AppendText("█")
+            Next
+            For i As Byte = steps + 1 To 40
+                .AppendText("░")
+            Next
+            .AppendText("║ " & value & " %" & vbCrLf)
+            .AppendText("╚════════════════════════════════════════╝")
+        End With
+    End Sub
+
 End Module
