@@ -300,6 +300,9 @@ Public Class Form1
                 Case "ifpingsuccessfull"
                     writeCommandInfoLog(tempCommand, parameter)
                     Return cmdIfPingSuccessfull(parameter)
+                Case "cls", "clear"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdCls()
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -883,6 +886,9 @@ Public Class Form1
         End If
         Return -1
     End Function
+    Public Sub cmdCls()
+        RichTextBox1.Clear()
+    End Sub
 End Class
 
 
@@ -926,4 +932,6 @@ End Class
 'createRegKey RegPath;
 'delRegKey RegPath;
 'delRegValue RegPath | EntryName;
+'Include Path;
 'ifPingSuccessfull Address | truelable | falselable;
+'cls;
