@@ -297,6 +297,9 @@ Public Class Form1
                 Case "delregvalue"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdDelRegValue(parameter)
+                Case "ifpingsuccessfull"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    Return cmdIfPingSuccessfull(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -847,6 +850,39 @@ Public Class Form1
             writeErrorLog("Fehler bei DelRegEntry" & vbCrLf & ex.ToString)
         End Try
     End Sub
+    Public Function cmdIfPingSuccessfull(parameter As String) As Integer
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            splitedParameter.Add(item)
+        Next
+        If splitedParameter.Count = 2 Or splitedParameter.Count = 3 Then
+            Dim result As Boolean = False
+            Dim pingerror As String = ""
+            Try
+                result = My.Computer.Network.Ping(splitedParameter(0))
+            Catch ex As Exception
+                result = False
+                pingerror = ex.InnerException.Message
+            End Try
+            If result = True Then
+                writeInfoLog(splitedParameter(0) & " ist erreichbar")
+                Return jumpChecker(splitedParameter(1))
+            Else
+                If pingerror <> "" Then
+                    writeInfoLog(splitedParameter(0) & " ist nicht erreichbar")
+                Else
+                    writeInfoLog(splitedParameter(0) & " ist nicht erreichbar: " & pingerror)
+                End If
+                If splitedParameter.Count = 3 Then
+                    Return jumpChecker(splitedParameter(2))
+                End If
+            End If
+        Else
+            writeErrorLog("Syntaxerror in Befehl: IfPingSuccessfull")
+        End If
+        Return -1
+    End Function
 End Class
 
 
@@ -890,3 +926,4 @@ End Class
 'createRegKey RegPath;
 'delRegKey RegPath;
 'delRegValue RegPath | EntryName;
+'ifPingSuccessfull Address | truelable | falselable;
