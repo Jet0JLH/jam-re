@@ -42,6 +42,52 @@
         For Each item In varList
             outputString = outputString.Replace("$" & item.Name & "$", item.Value)
         Next
+        With My.Computer.Clock.LocalTime
+            outputString = outputString.Replace("%day%", .Day)
+            outputString = outputString.Replace("%month%", .Month)
+            outputString = outputString.Replace("%year%", .Year)
+            outputString = outputString.Replace("%second%", .Second)
+            outputString = outputString.Replace("%minute%", .Minute)
+            outputString = outputString.Replace("%hour%", .Hour)
+            Dim day As String = ""
+            Dim month As String = ""
+            Dim year As String = ""
+            Dim second As String = ""
+            Dim minute As String = ""
+            Dim hour As String = ""
+            If .Day < 10 Then
+                day = "0" & .Day
+            Else
+                day = .Day
+            End If
+            If .Month < 10 Then
+                month = "0" & .Month
+            Else
+                month = .Month
+            End If
+            If .Second < 10 Then
+                second = "0" & .Second
+            Else
+                second = .Second
+            End If
+            If .Minute < 10 Then
+                minute = "0" & .Minute
+            Else
+                minute = .Minute
+            End If
+            If .Hour < 10 Then
+                hour = "0" & .Hour
+            Else
+                hour = .Hour
+            End If
+            outputString = outputString.Replace("%DAY%", .Day)
+            outputString = outputString.Replace("%MONTH%", .Month)
+            outputString = outputString.Replace("%YEAR%", .Year)
+            outputString = outputString.Replace("%SECOND%", .Second)
+            outputString = outputString.Replace("%MINUTE%", .Minute)
+            outputString = outputString.Replace("%HOUR%", .Hour)
+        End With
+
         Return outputString
     End Function
 End Module
