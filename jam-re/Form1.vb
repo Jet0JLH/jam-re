@@ -303,6 +303,9 @@ Public Class Form1
                 Case "cls", "clear"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdCls()
+                Case "if"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    Return cmdIf(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -889,6 +892,82 @@ Public Class Form1
     Public Sub cmdCls()
         RichTextBox1.Clear()
     End Sub
+    Public Function cmdIf(parameter As String) As Integer
+        parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+        Dim caseSensitive As Boolean = False
+        Dim splitedParameter As New List(Of String)
+        For Each item In parameter.Split("|")
+            If item.ToLower = "casesensitive:true" Then
+                caseSensitive = True
+            ElseIf item.ToLower = "casesensitive:false" Then
+                caseSensitive = False
+            Else
+                splitedParameter.Add(item)
+            End If
+        Next
+        If splitedParameter.Count = 4 Or splitedParameter.Count = 5 Then
+            If caseSensitive = False Then
+                splitedParameter(0) = splitedParameter(0).ToLower()
+                splitedParameter(2) = splitedParameter(2).ToLower()
+            End If
+            Dim result As Boolean
+
+            Dim int1
+            Dim int2
+            If Double.TryParse(splitedParameter(0), New Double) Then
+                Dim int11 As Double
+                Double.TryParse(splitedParameter(0), int11)
+                int1 = int11
+            Else
+                Dim int11 As String = splitedParameter(0)
+                int1 = int11
+            End If
+            If Double.TryParse(splitedParameter(2), New Double) Then
+                Dim int22 As Double
+                Double.TryParse(splitedParameter(2), int22)
+                int2 = int22
+            Else
+                Dim int22 As String = splitedParameter(2)
+                int2 = int22
+            End If
+
+            Select Case splitedParameter(1)
+                Case "<"
+                    result = int1 < int2
+                Case ">"
+                    result = int1 > int2
+                Case "<="
+                    result = int1 <= int2
+                Case ">="
+                    result = int1 >= int2
+                Case "=", "=="
+                    result = int1 = int2
+                Case "!=", "<>"
+                    result = int1 <> int2
+                Case "contains"
+                    result = splitedParameter(0).Contains(splitedParameter(2))
+                Case "startswith"
+                    result = splitedParameter(0).StartsWith(splitedParameter(2))
+                Case "endswith"
+                    result = splitedParameter(0).EndsWith(splitedParameter(2))
+                Case Else
+                    writeErrorLog(splitedParameter(1) & " ist kein gültiger Operator")
+                    Return -1
+            End Select
+            If result Then
+                writeInfoLog("If ist True")
+                Return jumpChecker(splitedParameter(3))
+            Else
+                writeInfoLog("If ist False")
+                If splitedParameter.Count = 5 Then
+                    Return jumpChecker(splitedParameter(4))
+                End If
+            End If
+        Else
+            writeErrorLog("Syntaxerror in Befehl: If")
+        End If
+        Return -1
+    End Function
 End Class
 
 
@@ -922,8 +1001,8 @@ End Class
 'log true/false | Pfad_der_Logdatei;
 'set varName | varValue;
 'readFile File > varName;
-'ifStringEqual string1 | string2 | truelable | falselable;
-'ifStringContain zuPrüfendenString | enthälltString | truelable | falselable;
+'ifStringEqual string1 | string2 | truelable | falselable; (Veraltet! Funktion in Befehl IF integriert)
+'ifStringContain zuPrüfendenString | enthälltString | truelable | falselable; (Veraltet! Funktion in Befehl IF integriert)
 'calculate ergebnis | rechenstring;
 'substring ergebnis | string | startindex | länge;
 'replaceString ergebnis | string | oldChar | newChar;
@@ -935,3 +1014,4 @@ End Class
 'Include Path;
 'ifPingSuccessfull Address | truelable | falselable;
 'cls;
+'if casesensitive:false | wert1 | operator | wert2 | truelable | falselable;

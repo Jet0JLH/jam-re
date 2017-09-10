@@ -80,12 +80,12 @@
             Else
                 hour = .Hour
             End If
-            outputString = outputString.Replace("%DAY%", .Day)
-            outputString = outputString.Replace("%MONTH%", .Month)
-            outputString = outputString.Replace("%YEAR%", .Year)
-            outputString = outputString.Replace("%SECOND%", .Second)
-            outputString = outputString.Replace("%MINUTE%", .Minute)
-            outputString = outputString.Replace("%HOUR%", .Hour)
+            outputString = outputString.Replace("%DAY%", day)
+            outputString = outputString.Replace("%MONTH%", month)
+            outputString = outputString.Replace("%YEAR%", year)
+            outputString = outputString.Replace("%SECOND%", second)
+            outputString = outputString.Replace("%MINUTE%", minute)
+            outputString = outputString.Replace("%HOUR%", hour)
         End With
 
         Return outputString
