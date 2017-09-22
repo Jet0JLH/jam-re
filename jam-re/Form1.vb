@@ -103,7 +103,17 @@ Public Class Form1
                 Next
             End If
             'Ersetze weitere Variablen
-            Script = Script.Replace("%_br%", Chr(13) & Chr(10))
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%_br%", Chr(13) & Chr(10), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%br%", Chr(13) & Chr(10), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userstartmenuprograms%", Environment.GetFolderPath(System.Environment.SpecialFolder.Programs), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%usersendto%", Environment.GetFolderPath(System.Environment.SpecialFolder.SendTo), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userrecent%", Environment.GetFolderPath(System.Environment.SpecialFolder.Recent), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userstartmenu%", Environment.GetFolderPath(System.Environment.SpecialFolder.StartMenu), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userstartup%", Environment.GetFolderPath(System.Environment.SpecialFolder.Startup), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userdocuments%", Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%usermusic%", Environment.GetFolderPath(System.Environment.SpecialFolder.MyMusic), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%userpictures%", Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures), , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
             Script = Environment.ExpandEnvironmentVariables(Script)
 
 
