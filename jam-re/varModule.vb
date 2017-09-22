@@ -43,15 +43,14 @@
             outputString = outputString.Replace("$" & item.Name & "$", item.Value)
         Next
         With My.Computer.Clock.LocalTime
-            outputString = outputString.Replace("%day%", .Day)
-            outputString = outputString.Replace("%month%", .Month)
-            outputString = outputString.Replace("%year%", .Year)
-            outputString = outputString.Replace("%second%", .Second)
-            outputString = outputString.Replace("%minute%", .Minute)
-            outputString = outputString.Replace("%hour%", .Hour)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%day%", .Day, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%month%", .Month, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%year%", .Year, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%second%", .Second, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%minute%", .Minute, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%hour%", .Hour, , , Constants.vbTextCompare)
             Dim day As String = ""
             Dim month As String = ""
-            Dim year As String = ""
             Dim second As String = ""
             Dim minute As String = ""
             Dim hour As String = ""
@@ -80,12 +79,11 @@
             Else
                 hour = .Hour
             End If
-            outputString = outputString.Replace("%DAY%", day)
-            outputString = outputString.Replace("%MONTH%", month)
-            outputString = outputString.Replace("%YEAR%", year)
-            outputString = outputString.Replace("%SECOND%", second)
-            outputString = outputString.Replace("%MINUTE%", minute)
-            outputString = outputString.Replace("%HOUR%", hour)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%0day%", day, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%0month%", month, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%0second%", second, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%0minute%", minute, , , Constants.vbTextCompare)
+            outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%0hour%", hour, , , Constants.vbTextCompare)
         End With
 
         Return outputString
