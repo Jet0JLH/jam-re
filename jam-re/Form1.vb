@@ -279,7 +279,7 @@ Public Class Form1
                 Case "gosub"
                     writeCommandInfoLog(tempCommand, parameter)
                     CmdGoSub(parameter)
-                Case "wget"
+                Case "wget", "download"
                     writeCommandInfoLog(tempCommand, parameter)
                     CmdWget(parameter)
                 Case "log"
@@ -1016,7 +1016,7 @@ End Class
 'taskKill taskname;
 'taskClose taskname;
 'goSub lablename;
-'wget DownloadDatei | Speicherort;
+'download DownloadDatei | Speicherort;
 'log true/false | Pfad_der_Logdatei;
 'set varName | varValue;
 'readFile File > varName;
