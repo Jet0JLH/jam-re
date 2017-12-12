@@ -13,21 +13,7 @@ Public Class Form1
 
         Dim exe As New Threading.Thread(AddressOf executeThread)
         exe.Start()
-        openThread.Start()
-    End Sub
-    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-        Me.Location = New Point(Me.Location.X + (Me.Width / 2), Me.Location.Y + (Me.Height / 2))
-        Me.Width = 2
-        Me.Height = 2
-    End Sub
-
-    Protected Overrides Sub onpaint(ByVal a As System.Windows.Forms.PaintEventArgs)
-        ' Formgröße
-        Dim größe As New Rectangle(0, 0, Me.Width, Me.Height)
-        Using lgb As New LinearGradientBrush(größe, Color.LightGray, Color.DarkGray, LinearGradientMode.BackwardDiagonal)
-            ' anzeigen
-            a.Graphics.FillRectangle(lgb, größe)
-        End Using
+        'openThread.Start()
     End Sub
 
     Sub openForm()
@@ -122,7 +108,7 @@ Public Class Form1
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%osversion%", Environment.OSVersion.VersionString, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%processorcount%", Environment.ProcessorCount, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%currentdirectory%", Environment.CurrentDirectory, , , Constants.vbTextCompare)
-            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
+            'Script = Microsoft.VisualBasic.Strings.Replace(Script, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
             Script = Environment.ExpandEnvironmentVariables(Script)
 
 
@@ -203,6 +189,9 @@ Public Class Form1
 
     Public Function CommandSelect(ByVal command As String, Optional ByVal parameter As String = "") 'Deklariert alle Befehle
         Try
+            If command Is Nothing Then
+                Return -3
+            End If
             Dim tempCommand As String = command.ToLower
             Select Case tempCommand
                 Case "#"
@@ -325,9 +314,20 @@ Public Class Form1
                 Case "if"
                     writeCommandInfoLog(tempCommand, parameter)
                     Return cmdIf(parameter)
+                Case "size"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdSize(parameter)
+                Case "opacity"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdOpacity(parameter)
+                Case "topmost"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdTopMost(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
+                    ElseIf tempCommand.StartsWith("#") Then
+                        'Hierbei handelt es sich um ein Kommentar. Es wird nichts unternommen!
                     Else
                         writeCommandErrorLog(command, parameter, "Befehl unbekannt!")
                     End If
@@ -987,6 +987,57 @@ Public Class Form1
         End If
         Return -1
     End Function
+    Public Sub cmdSize(parameter As String)
+        Try
+            parameter = parameter.Replace(" |", "|").Replace("| ", "|")
+            If parameter.Split("|").Count = 2 Or parameter.Split("|").Count = 1 Then
+                Dim tempList As New List(Of String)
+                For Each item In parameter.Split("|")
+                    tempList.Add(item)
+                Next
+                If parameter.Split("|").Count = 2 Then
+                    Me.WindowState = FormWindowState.Normal
+                    Me.Width = tempList(0)
+                    Me.Height = tempList(1)
+                    Me.CenterToScreen()
+                Else
+                    If tempList(0).ToLower = "default" Then
+                        Me.WindowState = FormWindowState.Normal
+                        Me.Size = New Size(526, 265)
+                    ElseIf tempList(0).ToLower = "full" Then
+                        Me.WindowState = FormWindowState.Maximized
+                    Else
+                        writeErrorLog("Syntaxfehler in Befehl: Size")
+                    End If
+                End If
+                RichTextBox1_TextChanged(New Object, New EventArgs)
+            Else
+                writeErrorLog("Syntaxfehler in Befehl: Size")
+            End If
+        Catch ex As Exception
+            writeErrorLog("Unerwarteter Fehler in Befehl: Size" & vbCrLf & ex.ToString)
+        End Try
+    End Sub
+    Public Sub cmdOpacity(parameter As String)
+        Try
+            Me.Opacity = parameter / 100
+        Catch ex As Exception
+            writeErrorLog("Unerwarteter Fehler in Befehl: Opacity" & vbCrLf & ex.ToString)
+        End Try
+    End Sub
+    Public Sub cmdTopMost(parameter As String)
+        Try
+            If parameter.ToLower = "true" Then
+                Me.TopMost = True
+            ElseIf parameter.ToLower = "false" Then
+                Me.TopMost = False
+            Else
+                writeErrorLog("Syntaxfehler in Befehl: TopMost")
+            End If
+        Catch ex As Exception
+            writeErrorLog("Unerwarteter Fehler in Befehl: TopMost" & vbCrLf & ex.ToString)
+        End Try
+    End Sub
 End Class
 
 
@@ -1034,3 +1085,6 @@ End Class
 'ifPingSuccessfull Address | truelable | falselable;
 'cls;
 'if casesensitive:false | wert1 | operator | wert2 | truelable | falselable;
+'size width | height; or size full/default;
+'opacity 0-100;
+'topMost true/false;

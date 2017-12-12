@@ -42,6 +42,7 @@
         For Each item In varList
             outputString = outputString.Replace("$" & item.Name & "$", item.Value)
         Next
+        outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
         With My.Computer.Clock.LocalTime
             outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%day%", .Day, , , Constants.vbTextCompare)
             outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%month%", .Month, , , Constants.vbTextCompare)
