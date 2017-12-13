@@ -1009,6 +1009,7 @@ Public Class Form1
                     If tempList(0).ToLower = "default" Then
                         Me.WindowState = FormWindowState.Normal
                         Me.Size = New Size(526, 265)
+                        Me.CenterToScreen()
                     ElseIf tempList(0).ToLower = "full" Then
                         Me.WindowState = FormWindowState.Maximized
                     Else
