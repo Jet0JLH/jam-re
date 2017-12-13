@@ -35,6 +35,8 @@ Public Class Form1
     End Sub
 
     Sub closeForm()
+        Me.WindowState = FormWindowState.Normal
+        Me.CenterToScreen()
         '526; 265
         Do While Me.Height > 2
             Me.Height -= 4
@@ -323,6 +325,9 @@ Public Class Form1
                 Case "topmost"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdTopMost(parameter)
+                Case "fontsize"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdFontSize(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -1038,6 +1043,20 @@ Public Class Form1
             writeErrorLog("Unerwarteter Fehler in Befehl: TopMost" & vbCrLf & ex.ToString)
         End Try
     End Sub
+    Public Sub cmdFontSize(parameter As String)
+        Try
+            Dim newSize As Byte = parameter
+            If newSize < 5 Then
+                newSize = 5
+            ElseIf newSize > 40 Then
+                newSize = 40
+            End If
+            RichTextBox1.Font = New Font(RichTextBox1.Font.FontFamily, newSize)
+            RichTextBox1_TextChanged(New Object, New EventArgs)
+        Catch ex As Exception
+            writeErrorLog("Syntaxfehler in Befehl: FontSize")
+        End Try
+    End Sub
 End Class
 
 
@@ -1088,3 +1107,4 @@ End Class
 'size width | height; or size full/default;
 'opacity 0-100;
 'topMost true/false;
+'fontsize 5-40;
