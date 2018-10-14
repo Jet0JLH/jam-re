@@ -1154,3 +1154,4 @@ End Class
 'opacity 0-100;
 'topMost true/false;
 'fontsize 5-40;
+'changeDir Path;
