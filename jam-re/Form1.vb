@@ -109,6 +109,7 @@ Public Class Form1
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%osplatform%", Environment.OSVersion.Platform.ToString, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%osversion%", Environment.OSVersion.VersionString, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%processorcount%", Environment.ProcessorCount, , , Constants.vbTextCompare)
+            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%applicationpath%", My.Application.Info.DirectoryPath, , , Constants.vbTextCompare)
             'Script = Microsoft.VisualBasic.Strings.Replace(Script, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
             Script = Environment.ExpandEnvironmentVariables(Script)
 
