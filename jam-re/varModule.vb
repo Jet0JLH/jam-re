@@ -51,6 +51,7 @@
             outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%minute%", .Minute, , , Constants.vbTextCompare)
             outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%hour%", .Hour, , , Constants.vbTextCompare)
             outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%currentdirectory%", IO.Directory.GetCurrentDirectory, , , Constants.vbTextCompare)
+            'outputString = Microsoft.VisualBasic.Strings.Replace(outputString, "%lastRowIndex%", Form1.RichTextBox1.Lines.Count - 1, , , Constants.vbTextCompare) 'Aus mir unerfindlichen Gründen gibt diese Variable immer -1 zurück. Daher erst mal nicht aktiv
             Dim day As String = ""
             Dim month As String = ""
             Dim second As String = ""

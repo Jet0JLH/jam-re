@@ -313,6 +313,9 @@ Public Class Form1
                 Case "cls", "clear"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdCls()
+                Case "clearline"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdClearLine(parameter)
                 Case "if"
                     writeCommandInfoLog(tempCommand, parameter)
                     Return cmdIf(parameter)
@@ -919,6 +922,37 @@ Public Class Form1
     Public Sub cmdCls()
         RichTextBox1.Clear()
     End Sub
+    Public Sub cmdClearLine(parameter As String)
+        If IsNumeric(parameter) Then
+            If RichTextBox1.Lines.Count > parameter Then
+                Dim templist As List(Of String) = RichTextBox1.Lines.ToList
+                templist.RemoveAt(parameter)
+                RichTextBox1.Lines = templist.ToArray
+            Else
+                writeErrorLog("Jam-re hat noch nicht genügend Zeile ausgegeben. Daher kann die gewünschte Zeile nicht gelöscht werden")
+            End If
+        Else
+            If parameter.ToLower = "last" Then
+                If RichTextBox1.Lines.Count > 1 Then
+                    Dim templist As List(Of String) = RichTextBox1.Lines.ToList
+                    templist.RemoveAt(RichTextBox1.Lines.Count - 2)
+                    RichTextBox1.Lines = templist.ToArray
+                Else
+                    writeErrorLog("Jam-re hat noch keine Zeile ausgegeben. Daher kann auch keine gelöscht werden")
+                End If
+            ElseIf parameter.ToLower = "first" Then
+                If RichTextBox1.Lines.Count > 1 Then
+                    Dim templist As List(Of String) = RichTextBox1.Lines.ToList
+                    templist.RemoveAt(0)
+                    RichTextBox1.Lines = templist.ToArray
+                Else
+                    writeErrorLog("Jam-re hat noch keine Zeile ausgegeben. Daher kann auch keine gelöscht werden")
+                End If
+            Else
+                writeErrorLog("Syntaxfehler bei Befehl: clearLine! Es wurde keine Zeilennummer als Zahl angegeben")
+            End If
+        End If
+    End Sub
     Public Function cmdIf(parameter As String) As Integer
         parameter = parameter.Replace(" |", "|").Replace("| ", "|")
         Dim caseSensitive As Boolean = False
@@ -1113,7 +1147,8 @@ End Class
 'delRegValue RegPath | EntryName;
 'Include Path;
 'ifPingSuccessfull Address | truelable | falselable;
-'cls;
+'cls/clear;
+'clearLine <Zeilenindex Nullbasiert>/first/last;
 'if casesensitive:false | wert1 | operator | wert2 | truelable | falselable;
 'size width | height; or size full/default;
 'opacity 0-100;
