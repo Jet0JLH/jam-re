@@ -109,7 +109,6 @@ Public Class Form1
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%osplatform%", Environment.OSVersion.Platform.ToString, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%osversion%", Environment.OSVersion.VersionString, , , Constants.vbTextCompare)
             Script = Microsoft.VisualBasic.Strings.Replace(Script, "%processorcount%", Environment.ProcessorCount, , , Constants.vbTextCompare)
-            Script = Microsoft.VisualBasic.Strings.Replace(Script, "%currentdirectory%", Environment.CurrentDirectory, , , Constants.vbTextCompare)
             'Script = Microsoft.VisualBasic.Strings.Replace(Script, "%uptime%", Environment.TickCount, , , Constants.vbTextCompare)
             Script = Environment.ExpandEnvironmentVariables(Script)
 
@@ -198,7 +197,7 @@ Public Class Form1
             Select Case tempCommand
                 Case "#"
                     'Hierbei handelt es sich um ein Kommentar. Es wird nichts unternommen!
-                Case "message"
+                Case "message", "echo"
                     writeCommandInfoLog(tempCommand, parameter)
                     CmdMessage(parameter)
                 Case "sleep", "wait"
@@ -328,6 +327,9 @@ Public Class Form1
                 Case "fontsize"
                     writeCommandInfoLog(tempCommand, parameter)
                     cmdFontSize(parameter)
+                Case "cd", "changedir"
+                    writeCommandInfoLog(tempCommand, parameter)
+                    cmdCd(parameter)
                 Case Else
                     If tempCommand.StartsWith(":") = True Then
                         writeInfoLog("Lable " & tempCommand.Substring(1) & " erreicht.")
@@ -1058,11 +1060,18 @@ Public Class Form1
             writeErrorLog("Syntaxfehler in Befehl: FontSize")
         End Try
     End Sub
+    Public Sub cmdCd(parameter As String)
+        Try
+            IO.Directory.SetCurrentDirectory(IO.Path.GetFullPath(parameter))
+        Catch ex As Exception
+            writeErrorLog("Fehler beim wechseln des Verzeichnisses")
+        End Try
+    End Sub
 End Class
 
 
 '# kommentar;
-'message text;
+'message/echo text;
 'sleep/wait sekunden;
 'delDir pfad
 'copyDir quelle > ziel
