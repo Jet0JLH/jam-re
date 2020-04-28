@@ -13,8 +13,8 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyTitle("jam-re")> 
 <Assembly: AssemblyDescription("")> 
 <Assembly: AssemblyCompany("")> 
-<Assembly: AssemblyProduct("jam-re")> 
-<Assembly: AssemblyCopyright("Copyright © Jan-Lukas Halder 2016")> 
+<Assembly: AssemblyProduct("jam-re")>
+<Assembly: AssemblyCopyright("Copyright © Jan-Lukas Halder 2016-2020")>
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)> 
@@ -33,7 +33,7 @@ Imports System.Runtime.InteropServices
 ' übernehmen, indem Sie "*" eingeben:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.7.7.0")>
-<Assembly: AssemblyFileVersion("1.7.7.0")>
+<Assembly: AssemblyVersion("2.0.0.0")>
+<Assembly: AssemblyFileVersion("2.0.0.0")>
 
 <Assembly: NeutralResourcesLanguageAttribute("de")> 
