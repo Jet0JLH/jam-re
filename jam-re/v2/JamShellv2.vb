@@ -43,23 +43,31 @@ Public Class JamShellv2
     Private Sub changeVisibility(ByRef sender As JamEngine, ByVal value As Boolean)
         Me.Visible = value
     End Sub
-    Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer)
-        If clearLines <> 0 Then
-            If Pinwall.Lines.Count - 1 <= clearLines Then
-                Pinwall.Clear()
-            ElseIf clearLines > 0 Then
-                Dim tempList As List(Of String) = Pinwall.Lines.ToList
-                For i As Integer = 0 To clearLines - 1
-                    tempList.Remove(tempList.Count - 1)
-                Next
-                Pinwall.Lines = tempList.ToArray
-            Else
-                For i As Integer = 0 To clearLines + 1
-                    Pinwall.AppendText(vbCrLf)
-                Next
+    Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
+        If clear Then
+            Pinwall.Clear()
+        Else
+            If clearLines <> 0 Then
+                If Pinwall.Lines.Count <= clearLines Then
+                    Pinwall.Clear()
+                ElseIf clearLines > 0 Then
+                    Dim tempList As List(Of String) = Pinwall.Lines.ToList
+                    For i As Integer = 0 To clearLines
+                        tempList.Remove(tempList.Count - 1)
+                    Next
+                    Pinwall.Lines = tempList.ToArray
+                Else
+                    For i As Integer = 0 To clearLines
+                        Pinwall.AppendText(vbCrLf)
+                    Next
+                End If
             End If
         End If
-        Pinwall.AppendText(text & vbCrLf)
+        If newLine Then
+            Pinwall.AppendText(text & vbCrLf)
+        Else
+            Pinwall.AppendText(text)
+        End If
     End Sub
 #End Region
 

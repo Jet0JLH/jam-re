@@ -24,7 +24,7 @@
     End Sub
 #Region "Events"
     Public Event StatusChanged(ByRef sender As JamEngine, ByVal oldStatus As EngineStatus, ByVal newStatus As EngineStatus)
-    Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer)
+    Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
     Public Event changeVisibility(ByRef sender As JamEngine, ByVal value As Boolean)
 #End Region
 
@@ -160,6 +160,8 @@
                         cmdMessage(command.parameters)
                     Case "visible"
                         cmdVisible(command.parameters)
+                    Case "clear", "cls"
+                        cmdClear()
                     Case "exit"
                         cmdExit(command.parameters)
                 End Select
@@ -175,7 +177,7 @@
 #Region "Commands"
     Private Function cmdMessage(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
-        RaiseEvent writeText(Me, parameters(0), 0)
+        RaiseEvent writeText(Me, parameters(0), 0, True, False)
         Return New cmdError("", 0, False)
     End Function
     Private Function cmdSleep(parameters As List(Of String)) As cmdError
@@ -193,6 +195,10 @@
         Else
             Return New cmdError("Wrong Parameter", cmdErrorCode.WrongType, True)
         End If
+        Return New cmdError("", 0, False)
+    End Function
+    Private Function cmdClear() As cmdError
+        RaiseEvent writeText(Me, "", 0, False, True)
         Return New cmdError("", 0, False)
     End Function
     Private Function cmdExit(parameters As List(Of String))
