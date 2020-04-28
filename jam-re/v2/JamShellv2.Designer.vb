@@ -22,9 +22,10 @@ Partial Class JamShellv2
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(JamShellv2))
         Me.TitleLabel = New System.Windows.Forms.Label()
         Me.VersionsLabel = New System.Windows.Forms.Label()
-        Me.RichTextBox1 = New System.Windows.Forms.RichTextBox()
+        Me.Pinwall = New System.Windows.Forms.RichTextBox()
         Me.SuspendLayout()
         '
         'TitleLabel
@@ -50,20 +51,21 @@ Partial Class JamShellv2
         Me.VersionsLabel.TabIndex = 4
         Me.VersionsLabel.Text = "Version"
         '
-        'RichTextBox1
+        'Pinwall
         '
-        Me.RichTextBox1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+        Me.Pinwall.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.RichTextBox1.BackColor = System.Drawing.Color.LightBlue
-        Me.RichTextBox1.Cursor = System.Windows.Forms.Cursors.Default
-        Me.RichTextBox1.Location = New System.Drawing.Point(13, 19)
-        Me.RichTextBox1.Name = "RichTextBox1"
-        Me.RichTextBox1.ReadOnly = True
-        Me.RichTextBox1.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None
-        Me.RichTextBox1.Size = New System.Drawing.Size(501, 234)
-        Me.RichTextBox1.TabIndex = 3
-        Me.RichTextBox1.Text = ""
+        Me.Pinwall.BackColor = System.Drawing.Color.LightBlue
+        Me.Pinwall.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Pinwall.Cursor = System.Windows.Forms.Cursors.Default
+        Me.Pinwall.Location = New System.Drawing.Point(13, 19)
+        Me.Pinwall.Name = "Pinwall"
+        Me.Pinwall.ReadOnly = True
+        Me.Pinwall.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None
+        Me.Pinwall.Size = New System.Drawing.Size(501, 234)
+        Me.Pinwall.TabIndex = 3
+        Me.Pinwall.Text = ""
         '
         'JamShellv2
         '
@@ -73,8 +75,9 @@ Partial Class JamShellv2
         Me.ClientSize = New System.Drawing.Size(526, 265)
         Me.Controls.Add(Me.TitleLabel)
         Me.Controls.Add(Me.VersionsLabel)
-        Me.Controls.Add(Me.RichTextBox1)
+        Me.Controls.Add(Me.Pinwall)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "JamShellv2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "JamShellv2"
@@ -85,5 +88,5 @@ Partial Class JamShellv2
 
     Friend WithEvents TitleLabel As Label
     Friend WithEvents VersionsLabel As Label
-    Friend WithEvents RichTextBox1 As RichTextBox
+    Friend WithEvents Pinwall As RichTextBox
 End Class
