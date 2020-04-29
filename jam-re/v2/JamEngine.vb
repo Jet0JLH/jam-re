@@ -27,6 +27,7 @@
     Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
     Public Event visibilityChanged(ByRef sender As JamEngine, ByVal value As Boolean)
     Public Event titleChanged(ByRef sender As JamEngine, ByVal value As String)
+    Public Event directoryChanged(ByRef sender As JamEngine, ByVal value As String)
 #End Region
 
 #Region "Properties"
@@ -81,6 +82,9 @@
         ToMannyParameter = 101
         NotEnoughParameter = 102
         WrongType = 103
+        IOError = 200
+        DirectoryDosNotExist = 201
+        FileDosNotExist = 202
     End Enum
     Public Class cmd
         Public command As String
@@ -183,6 +187,8 @@
 
                     Case "makefile", "mkfile"
 
+                    Case "cd"
+                        cmdCd(command.parameters)
                 End Select
 
                 _cmdPointer += 1
@@ -211,7 +217,7 @@
             If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
                 My.Computer.FileSystem.DeleteDirectory(parameters(0), FileIO.DeleteDirectoryOption.DeleteAllContents)
             Else
-                Return New cmdError("Directory dose not exist", 0, False)
+                Return New cmdError("Directory dose not exist", cmdErrorCode.DirectoryDosNotExist, False)
             End If
         Catch ex As Exception
             Return New cmdError("Error while deleting directory", cmdErrorCode.Failed, True)
@@ -222,12 +228,25 @@
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         Try
             If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
-                Return New cmdError("Directory already exist", 0, False)
+                Return New cmdError("Directory already exist", cmdErrorCode.IOError, False)
             Else
                 My.Computer.FileSystem.CreateDirectory(parameters(0))
             End If
         Catch ex As Exception
             Return New cmdError("Error while creating directory", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError("", 0, False)
+    End Function
+    Private Function cmdCd(parameters As List(Of String))
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                RaiseEvent directoryChanged(Me, parameters(0))
+            Else
+                Return New cmdError("Directory dose not exist", cmdErrorCode.DirectoryDosNotExist, True)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while changing directory", cmdErrorCode.Failed, True)
         End Try
         Return New cmdError("", 0, False)
     End Function

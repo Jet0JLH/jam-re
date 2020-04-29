@@ -19,6 +19,7 @@ Public Class JamRe_v2
         AddHandler engine.visibilityChanged, AddressOf visibilityChanged
         AddHandler engine.writeText, AddressOf writeText
         AddHandler engine.titleChanged, AddressOf titleChanged
+        AddHandler engine.directoryChanged, AddressOf directoryChanged
     End Sub
     Private Sub statusChanged(ByRef sender As JamEngine, ByVal oldStatus As JamEngine.EngineStatus, ByVal newStatus As JamEngine.EngineStatus)
         Select Case newStatus
@@ -46,6 +47,9 @@ Public Class JamRe_v2
     End Sub
     Private Sub titleChanged(ByRef sender As JamEngine, ByVal value As String)
         TitleLabel.Text = value
+    End Sub
+    Private Sub directoryChanged(ByRef sender As JamEngine, ByVal value As String)
+        IO.Directory.SetCurrentDirectory(value)
     End Sub
     Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
         If clear Then

@@ -7,12 +7,12 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{0781B98D-0604-4F94-892B-4FB945449761}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <StartupObject>jam_re.My.MyApplication</StartupObject>
+    <OutputType>Exe</OutputType>
+    <StartupObject>Sub Main</StartupObject>
     <RootNamespace>jam_re</RootNamespace>
     <AssemblyName>jam-re</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <MyType>WindowsForms</MyType>
+    <MyType>Console</MyType>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>
     </TargetFrameworkProfile>
@@ -129,6 +129,7 @@
     <Compile Include="v2\JamRe_v2.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="v2\JamShell_v2.vb" />
     <Compile Include="varModule.vb" />
   </ItemGroup>
   <ItemGroup>
