@@ -32,7 +32,7 @@ Namespace My
         
         <Global.System.Diagnostics.DebuggerStepThroughAttribute()>  _
         Protected Overrides Sub OnCreateMainForm()
-            Me.MainForm = Global.jam_re.JamShellv2
+            Me.MainForm = Global.jam_re.JamRe_v2
         End Sub
     End Class
 End Namespace

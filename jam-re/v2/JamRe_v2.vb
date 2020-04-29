@@ -1,6 +1,6 @@
 ﻿Imports System.ComponentModel
 
-Public Class JamShellv2
+Public Class JamRe_v2
     Dim version As String = My.Application.Info.Version.Major & "." & My.Application.Info.Version.Minor & "." & My.Application.Info.Version.Build
     Dim engine As JamEngine
     Private Sub JamShellv2_Shown(sender As Object, e As EventArgs) Handles Me.Shown
@@ -15,9 +15,10 @@ Public Class JamShellv2
     End Sub
 #Region "Handler"
     Private Sub addHandlers()
-        AddHandler engine.StatusChanged, AddressOf statusChanged
-        AddHandler engine.changeVisibility, AddressOf changeVisibility
+        AddHandler engine.statusChanged, AddressOf statusChanged
+        AddHandler engine.visibilityChanged, AddressOf visibilityChanged
         AddHandler engine.writeText, AddressOf writeText
+        AddHandler engine.titleChanged, AddressOf titleChanged
     End Sub
     Private Sub statusChanged(ByRef sender As JamEngine, ByVal oldStatus As JamEngine.EngineStatus, ByVal newStatus As JamEngine.EngineStatus)
         Select Case newStatus
@@ -40,8 +41,11 @@ Public Class JamShellv2
                 Pinwall.BackColor = Color.Red
         End Select
     End Sub
-    Private Sub changeVisibility(ByRef sender As JamEngine, ByVal value As Boolean)
+    Private Sub visibilityChanged(ByRef sender As JamEngine, ByVal value As Boolean)
         Me.Visible = value
+    End Sub
+    Private Sub titleChanged(ByRef sender As JamEngine, ByVal value As String)
+        TitleLabel.Text = value
     End Sub
     Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
         If clear Then

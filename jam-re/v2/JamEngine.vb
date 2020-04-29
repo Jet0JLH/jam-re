@@ -23,9 +23,10 @@
         Next
     End Sub
 #Region "Events"
-    Public Event StatusChanged(ByRef sender As JamEngine, ByVal oldStatus As EngineStatus, ByVal newStatus As EngineStatus)
+    Public Event statusChanged(ByRef sender As JamEngine, ByVal oldStatus As EngineStatus, ByVal newStatus As EngineStatus)
     Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
-    Public Event changeVisibility(ByRef sender As JamEngine, ByVal value As Boolean)
+    Public Event visibilityChanged(ByRef sender As JamEngine, ByVal value As Boolean)
+    Public Event titleChanged(ByRef sender As JamEngine, ByVal value As String)
 #End Region
 
 #Region "Properties"
@@ -158,12 +159,30 @@
                         cmdSleep(command.parameters)
                     Case "message", "echo", "write"
                         cmdMessage(command.parameters)
+                    Case "title"
+                        cmdTitle(command.parameters)
                     Case "visible"
                         cmdVisible(command.parameters)
                     Case "clear", "cls"
                         cmdClear()
                     Case "exit"
                         cmdExit(command.parameters)
+                    Case "deldir", "rmdir"
+                        cmdDelDir(command.parameters)
+                    Case "copydir"
+
+                    Case "movedir"
+
+                    Case "makedir", "mkdir"
+                        cmdMkDir(command.parameters)
+                    Case "delfile", "rmfile"
+
+                    Case "copyfile"
+
+                    Case "movefile"
+
+                    Case "makefile", "mkfile"
+
                 End Select
 
                 _cmdPointer += 1
@@ -186,12 +205,43 @@
         Threading.Thread.Sleep(parameters(0) * 1000)
         Return New cmdError("", 0, False)
     End Function
+    Private Function cmdDelDir(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                My.Computer.FileSystem.DeleteDirectory(parameters(0), FileIO.DeleteDirectoryOption.DeleteAllContents)
+            Else
+                Return New cmdError("Directory dose not exist", 0, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while deleting directory", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError("", 0, False)
+    End Function
+    Private Function cmdMkDir(parameters As List(Of String))
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                Return New cmdError("Directory already exist", 0, False)
+            Else
+                My.Computer.FileSystem.CreateDirectory(parameters(0))
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while creating directory", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError("", 0, False)
+    End Function
+    Private Function cmdTitle(parameters As List(Of String))
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        RaiseEvent titleChanged(Me, parameters(0))
+        Return New cmdError("", 0, False)
+    End Function
     Private Function cmdVisible(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         If parameters(0).ToLower = "true" Or parameters(0) = 1 Then
-            RaiseEvent changeVisibility(Me, True)
+            RaiseEvent visibilityChanged(Me, True)
         ElseIf parameters(0).ToLower = "false" Or parameters(0) = 0 Then
-            RaiseEvent changeVisibility(Me, False)
+            RaiseEvent visibilityChanged(Me, False)
         Else
             Return New cmdError("Wrong Parameter", cmdErrorCode.WrongType, True)
         End If

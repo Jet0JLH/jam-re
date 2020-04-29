@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
-Partial Class JamShellv2
+Partial Class JamRe_v2
     Inherits System.Windows.Forms.Form
 
     'Das Formular überschreibt den Löschvorgang, um die Komponentenliste zu bereinigen.
@@ -22,7 +22,7 @@ Partial Class JamShellv2
     'Das Bearbeiten mit dem Code-Editor ist nicht möglich.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(JamShellv2))
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(JamRe_v2))
         Me.TitleLabel = New System.Windows.Forms.Label()
         Me.VersionsLabel = New System.Windows.Forms.Label()
         Me.Pinwall = New System.Windows.Forms.RichTextBox()
@@ -67,7 +67,7 @@ Partial Class JamShellv2
         Me.Pinwall.TabIndex = 3
         Me.Pinwall.Text = ""
         '
-        'JamShellv2
+        'JamRe_v2
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
@@ -78,7 +78,7 @@ Partial Class JamShellv2
         Me.Controls.Add(Me.Pinwall)
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
-        Me.Name = "JamShellv2"
+        Me.Name = "JamRe_v2"
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "JamShellv2"
         Me.ResumeLayout(False)
