@@ -24,7 +24,7 @@
     End Sub
 #Region "Events"
     Public Event statusChanged(ByRef sender As JamEngine, ByVal oldStatus As EngineStatus, ByVal newStatus As EngineStatus)
-    Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
+    Public Event writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean, ByVal isError As Boolean)
     Public Event visibilityChanged(ByRef sender As JamEngine, ByVal value As Boolean)
     Public Event titleChanged(ByRef sender As JamEngine, ByVal value As String)
     Public Event directoryChanged(ByRef sender As JamEngine, ByVal value As String)
@@ -130,6 +130,11 @@
             _errorMessage = errorMessage
             _isFatal = isFatal
         End Sub
+        Public Sub New()
+            _errorCode = cmdErrorCode.Success
+            _errorMessage = ""
+            _isFatal = False
+        End Sub
         Public ReadOnly Property errorCode As cmdErrorCode
             Get
                 Return _errorCode
@@ -148,6 +153,7 @@
     End Class
     Private Sub executeThreadSub()
         Dim command As New cmd
+        Dim returnVal As New cmdError
         While _status <> EngineStatus.Stopping
             Select Case _status
                 Case EngineStatus.Resuming
@@ -156,42 +162,45 @@
             While _status = EngineStatus.Running
                 If _cmdPointer >= cmds.Count Then setStatus = EngineStatus.Finished : Exit While
                 command.pars(cmds(_cmdPointer))
+                returnVal = New cmdError("Nothing happens", 0, False)
                 Select Case command.command
                     Case "#"
                         'Do nothing. It's a comment
                     Case "sleep", "wait"
-                        cmdSleep(command.parameters)
+                        returnVal = cmdSleep(command.parameters)
                     Case "message", "echo", "write"
-                        cmdMessage(command.parameters)
+                        returnVal = cmdMessage(command.parameters)
                     Case "title"
-                        cmdTitle(command.parameters)
+                        returnVal = cmdTitle(command.parameters)
                     Case "visible"
-                        cmdVisible(command.parameters)
+                        returnVal = cmdVisible(command.parameters)
                     Case "clear", "cls"
-                        cmdClear()
+                        returnVal = cmdClear()
                     Case "exit"
-                        cmdExit(command.parameters)
+                        returnVal = cmdExit(command.parameters)
                     Case "deldir", "rmdir"
-                        cmdDelDir(command.parameters)
-                    Case "copydir"
-
-                    Case "movedir"
-
+                        returnVal = cmdDelDir(command.parameters)
+                    Case "copydir", "cpdir"
+                        returnVal = cmdCopyDir(command.parameters)
+                    Case "movedir", "mvdir"
+                        returnVal = cmdMoveDir(command.parameters)
                     Case "makedir", "mkdir"
-                        cmdMkDir(command.parameters)
+                        returnVal = cmdMkDir(command.parameters)
                     Case "delfile", "rmfile"
-
-                    Case "copyfile"
-
-                    Case "movefile"
-
+                        returnVal = cmdDelFile(command.parameters)
+                    Case "copyfile", "cpfile"
+                        returnVal = cmdCopyFile(command.parameters)
+                    Case "movefile", "mvfile"
+                        returnVal = cmdMoveFile(command.parameters)
                     Case "makefile", "mkfile"
-
+                        returnVal = cmdMkFile(command.parameters)
                     Case "cd"
-                        cmdCd(command.parameters)
+                        returnVal = cmdCd(command.parameters)
+                    Case Else
+                        returnVal = New cmdError("Command not known", cmdErrorCode.SyntaxError, True)
                 End Select
-
                 _cmdPointer += 1
+                If returnVal.errorCode <> cmdErrorCode.Success Then RaiseEvent writeText(Me, returnVal.errorMessage, 0, True, False, True)
             End While
             Threading.Thread.Sleep(250)
         End While
@@ -202,14 +211,14 @@
 #Region "Commands"
     Private Function cmdMessage(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
-        RaiseEvent writeText(Me, parameters(0), 0, True, False)
-        Return New cmdError("", 0, False)
+        RaiseEvent writeText(Me, parameters(0), 0, True, False, False)
+        Return New cmdError()
     End Function
     Private Function cmdSleep(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         If IsNumeric(parameters(0)) = False Then Return New cmdError("No number as parameter", cmdErrorCode.WrongType, True)
         Threading.Thread.Sleep(parameters(0) * 1000)
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
     Private Function cmdDelDir(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
@@ -222,9 +231,35 @@
         Catch ex As Exception
             Return New cmdError("Error while deleting directory", cmdErrorCode.Failed, True)
         End Try
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
-    Private Function cmdMkDir(parameters As List(Of String))
+    Private Function cmdCopyDir(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has not enough parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                My.Computer.FileSystem.CopyDirectory(parameters(0), parameters(1))
+            Else
+                Return New cmdError("Directory dose not exist", cmdErrorCode.DirectoryDosNotExist, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while copying directory", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdMoveDir(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has not enough parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                My.Computer.FileSystem.MoveDirectory(parameters(0), parameters(1))
+            Else
+                Return New cmdError("Directory dose not exist", cmdErrorCode.DirectoryDosNotExist, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while moving directory", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdMkDir(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         Try
             If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
@@ -235,9 +270,61 @@
         Catch ex As Exception
             Return New cmdError("Error while creating directory", cmdErrorCode.Failed, True)
         End Try
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
-    Private Function cmdCd(parameters As List(Of String))
+    Private Function cmdDelFile(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.FileExists(parameters(0)) Then
+                My.Computer.FileSystem.DeleteFile(parameters(0))
+            Else
+                Return New cmdError("File dose not exist", cmdErrorCode.FileDosNotExist, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while deleting file", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdCopyFile(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has not enough parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.FileExists(parameters(0)) Then
+                My.Computer.FileSystem.CopyFile(parameters(0), parameters(1))
+            Else
+                Return New cmdError("File dose not exist", cmdErrorCode.FileDosNotExist, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while copying file", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdMoveFile(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has not enough parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.FileExists(parameters(0)) Then
+                My.Computer.FileSystem.MoveFile(parameters(0), parameters(1))
+            Else
+                Return New cmdError("File dose not exist", cmdErrorCode.FileDosNotExist, False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while moving file", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdMkFile(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.FileExists(parameters(0)) Then
+                Return New cmdError("File already exist", cmdErrorCode.IOError, False)
+            Else
+                My.Computer.FileSystem.WriteAllText(parameters(0), "", False)
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while creating file", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError()
+    End Function
+    Private Function cmdCd(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         Try
             If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
@@ -248,12 +335,12 @@
         Catch ex As Exception
             Return New cmdError("Error while changing directory", cmdErrorCode.Failed, True)
         End Try
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
-    Private Function cmdTitle(parameters As List(Of String))
+    Private Function cmdTitle(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         RaiseEvent titleChanged(Me, parameters(0))
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
     Private Function cmdVisible(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
@@ -264,15 +351,15 @@
         Else
             Return New cmdError("Wrong Parameter", cmdErrorCode.WrongType, True)
         End If
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
     Private Function cmdClear() As cmdError
-        RaiseEvent writeText(Me, "", 0, False, True)
-        Return New cmdError("", 0, False)
+        RaiseEvent writeText(Me, "", 0, False, True, False)
+        Return New cmdError()
     End Function
-    Private Function cmdExit(parameters As List(Of String))
+    Private Function cmdExit(parameters As List(Of String)) As cmdError
         _status = EngineStatus.Stopping
-        Return New cmdError("", 0, False)
+        Return New cmdError()
     End Function
 #End Region
 End Class

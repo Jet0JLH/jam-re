@@ -51,7 +51,7 @@ Public Class JamRe_v2
     Private Sub directoryChanged(ByRef sender As JamEngine, ByVal value As String)
         IO.Directory.SetCurrentDirectory(value)
     End Sub
-    Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean)
+    Private Sub writeText(ByRef sender As JamEngine, ByVal text As String, ByVal clearLines As Integer, ByVal newLine As Boolean, ByVal clear As Boolean, isError As Boolean)
         If clear Then
             Pinwall.Clear()
         Else
