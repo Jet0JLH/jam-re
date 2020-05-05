@@ -2,11 +2,13 @@
     Private _status As EngineStatus
     Private _cmdPointer As Integer
     Private cmds As List(Of String)
+    Public callStack As Stack(Of Integer)
     Private executeThread As Threading.Thread
     Public Sub New()
         _status = EngineStatus.Halted
         _cmdPointer = 0
         cmds = New List(Of String)
+        callStack = New Stack(Of Integer)
         executeThread = New Threading.Thread(AddressOf executeThreadSub)
         executeThread.Start()
     End Sub
@@ -163,42 +165,48 @@
                 If _cmdPointer >= cmds.Count Then setStatus = EngineStatus.Finished : Exit While
                 command.pars(cmds(_cmdPointer))
                 returnVal = New cmdError("Nothing happens", 0, False)
-                Select Case command.command
-                    Case "#"
+                If command.command.StartsWith(":") Or command.command.ToLower.StartsWith("sub:") Then
+                    returnVal = New cmdError("Allright, Jumppoint", 0, False)
+                Else
+                    Select Case command.command
+                        Case "#"
                         'Do nothing. It's a comment
-                    Case "sleep", "wait"
-                        returnVal = cmdSleep(command.parameters)
-                    Case "message", "echo", "write"
-                        returnVal = cmdMessage(command.parameters)
-                    Case "title"
-                        returnVal = cmdTitle(command.parameters)
-                    Case "visible"
-                        returnVal = cmdVisible(command.parameters)
-                    Case "clear", "cls"
-                        returnVal = cmdClear()
-                    Case "exit"
-                        returnVal = cmdExit(command.parameters)
-                    Case "deldir", "rmdir"
-                        returnVal = cmdDelDir(command.parameters)
-                    Case "copydir", "cpdir"
-                        returnVal = cmdCopyDir(command.parameters)
-                    Case "movedir", "mvdir"
-                        returnVal = cmdMoveDir(command.parameters)
-                    Case "makedir", "mkdir"
-                        returnVal = cmdMkDir(command.parameters)
-                    Case "delfile", "rmfile"
-                        returnVal = cmdDelFile(command.parameters)
-                    Case "copyfile", "cpfile"
-                        returnVal = cmdCopyFile(command.parameters)
-                    Case "movefile", "mvfile"
-                        returnVal = cmdMoveFile(command.parameters)
-                    Case "makefile", "mkfile"
-                        returnVal = cmdMkFile(command.parameters)
-                    Case "cd"
-                        returnVal = cmdCd(command.parameters)
-                    Case Else
-                        returnVal = New cmdError("Command not known", cmdErrorCode.SyntaxError, True)
-                End Select
+                        Case "sleep", "wait"
+                            returnVal = cmdSleep(command.parameters)
+                        Case "message", "echo", "write"
+                            returnVal = cmdMessage(command.parameters)
+                        Case "title"
+                            returnVal = cmdTitle(command.parameters)
+                        Case "visible"
+                            returnVal = cmdVisible(command.parameters)
+                        Case "clear", "cls"
+                            returnVal = cmdClear()
+                        Case "exit"
+                            returnVal = cmdExit(command.parameters)
+                        Case "deldir", "rmdir"
+                            returnVal = cmdDelDir(command.parameters)
+                        Case "copydir", "cpdir"
+                            returnVal = cmdCopyDir(command.parameters)
+                        Case "movedir", "mvdir"
+                            returnVal = cmdMoveDir(command.parameters)
+                        Case "makedir", "mkdir"
+                            returnVal = cmdMkDir(command.parameters)
+                        Case "delfile", "rmfile"
+                            returnVal = cmdDelFile(command.parameters)
+                        Case "copyfile", "cpfile"
+                            returnVal = cmdCopyFile(command.parameters)
+                        Case "movefile", "mvfile"
+                            returnVal = cmdMoveFile(command.parameters)
+                        Case "makefile", "mkfile"
+                            returnVal = cmdMkFile(command.parameters)
+                        Case "cd"
+                            returnVal = cmdCd(command.parameters)
+                        Case "goto"
+                            returnVal = cmdGoto(command.parameters)
+                        Case Else
+                            returnVal = New cmdError("Command not known", cmdErrorCode.SyntaxError, True)
+                    End Select
+                End If
                 _cmdPointer += 1
                 If returnVal.errorCode <> cmdErrorCode.Success Then RaiseEvent writeText(Me, returnVal.errorMessage, 0, True, False, True)
             End While
@@ -206,6 +214,20 @@
         End While
         setStatus = EngineStatus.Stopped
     End Sub
+
+    Public Function doJump(jumpmark As String) As Boolean
+        Dim isSub As Boolean = False
+        jumpmark = jumpmark.ToLower
+        If jumpmark.StartsWith("sub:") Then jumpmark = jumpmark.Substring(3) : isSub = True
+        For i As Integer = 0 To cmds.Count - 1
+            If cmds(i) = jumpmark Then
+                If isSub Then callStack.Push(_cmdPointer)
+                _cmdPointer = i
+                Return True
+            End If
+        Next
+        Return False
+    End Function
 
 
 #Region "Commands"
@@ -337,6 +359,11 @@
         End Try
         Return New cmdError()
     End Function
+    Private Function cmdGoto(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        If doJump(parameters(0)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+        Return New cmdError("Jump successfully", 0, False)
+    End Function
     Private Function cmdTitle(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         RaiseEvent titleChanged(Me, parameters(0))
@@ -358,7 +385,11 @@
         Return New cmdError()
     End Function
     Private Function cmdExit(parameters As List(Of String)) As cmdError
-        _status = EngineStatus.Stopping
+        If callStack.Count = 0 Then
+            _status = EngineStatus.Stopping
+        Else
+            _cmdPointer = callStack.Pop
+        End If
         Return New cmdError()
     End Function
 #End Region
