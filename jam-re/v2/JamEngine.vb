@@ -163,7 +163,14 @@
                     setStatus = EngineStatus.Running
             End Select
             While _status = EngineStatus.Running
-                If _cmdPointer >= cmds.Count Then setStatus = EngineStatus.Finished : Exit While
+                If _cmdPointer >= cmds.Count Then
+                    If callStack.Count = 0 Then
+                        setStatus = EngineStatus.Finished
+                        Exit While
+                    Else
+                        _cmdPointer = callStack.Pop
+                    End If
+                End If
                 command.pars(cmds(_cmdPointer))
                 returnVal = New cmdError("Nothing happens", 0, False)
                 If command.command.StartsWith(":") Or command.command.ToLower.StartsWith("sub:") Then
@@ -206,6 +213,12 @@
                             returnVal = cmdIfFileExist(command.parameters)
                         Case "ifdirexist"
                             returnVal = cmdIfDirExist(command.parameters)
+                        Case "iftaskexist"
+                            returnVal = cmdIfTaskExist(command.parameters)
+                        Case "taskkill"
+                            returnVal = cmdTaskKill(command.parameters)
+                        Case "taskclose"
+                            returnVal = cmdTaskClose(command.parameters)
                         Case "include"
                             returnVal = cmdInclude(command.parameters)
                             _cmdPointer -= 1 'Set cmdPointer back
@@ -367,7 +380,7 @@
     End Function
     Private Function cmdGoto(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
-        If doJump(parameters(0)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+        If doJump(parameters(0)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True)
         Return New cmdError("Jump successfully", 0, False)
     End Function
     Private Function cmdTitle(parameters As List(Of String)) As cmdError
@@ -392,7 +405,7 @@
     End Function
     Private Function cmdExit(parameters As List(Of String)) As cmdError
         If callStack.Count = 0 Then
-            _status = EngineStatus.Stopping
+            setStatus  = EngineStatus.Stopping
         Else
             _cmdPointer = callStack.Pop
         End If
@@ -402,11 +415,11 @@
         If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         Try
             If My.Computer.FileSystem.FileExists(parameters(0)) Then
-                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True) Else Return New cmdError("File Exist", 0, False)
+                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError("File Exist", 0, False)
             Else
                 If parameters.Count > 2 Then
                     If doJump(parameters(2)) = False Then
-                        Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+                        Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True)
                     Else
                         Return New cmdError("File not exist", 0, False)
                     End If
@@ -422,11 +435,11 @@
         If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         Try
             If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
-                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True) Else Return New cmdError("Directory Exist", 0, False)
+                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError("Directory Exist", 0, False)
             Else
                 If parameters.Count > 2 Then
                     If doJump(parameters(2)) = False Then
-                        Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+                        Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True)
                     Else
                         Return New cmdError("Directory not exist", 0, False)
                     End If
@@ -438,6 +451,32 @@
             Return New cmdError("Something went wrong while checking directory existence", cmdErrorCode.IOError, True)
         End Try
     End Function
+    Private Function cmdIfTaskExist(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameters(0))
+            If doJump(parameters(1)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError
+        Next
+        If parameters.Count > 2 Then
+            If doJump(parameters(2)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError
+        Else
+            Return New cmdError("No else jumppoint set", 0, False)
+        End If
+    End Function
+    Private Function cmdTaskKill(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameters(0))
+            item.Kill()
+        Next
+        Return New cmdError
+    End Function
+    Private Function cmdTaskClose(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameters(0))
+            item.CloseMainWindow()
+        Next
+        Return New cmdError
+    End Function
+
 
     Private Function cmdInclude(parameters As List(Of String)) As cmdError
         cmds.RemoveAt(_cmdPointer) 'Remove Include out of commands
