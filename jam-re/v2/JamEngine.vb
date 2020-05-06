@@ -14,6 +14,7 @@
     End Sub
     Public Sub addCommands(cmd As String)
         cmd = cmd.Replace(Chr(10), "").Replace(Chr(13), "")
+        Dim addedCmdsCounter As Integer = 0
         For Each item In cmd.Split(";")
             While item.StartsWith(" ")
                 item = item.Substring(1)
@@ -21,7 +22,7 @@
             While item.EndsWith(" ")
                 item = item.Substring(0, item.Length - 1)
             End While
-            If item.StartsWith("#") = False And item <> "" Then cmds.Add(item)
+            If item.StartsWith("#") = False And item <> "" Then cmds.Insert(_cmdPointer + addedCmdsCounter, item) : addedCmdsCounter += 1
         Next
     End Sub
 #Region "Events"
@@ -169,8 +170,6 @@
                     returnVal = New cmdError("Allright, Jumppoint", 0, False)
                 Else
                     Select Case command.command
-                        Case "#"
-                        'Do nothing. It's a comment
                         Case "sleep", "wait"
                             returnVal = cmdSleep(command.parameters)
                         Case "message", "echo", "write"
@@ -203,6 +202,13 @@
                             returnVal = cmdCd(command.parameters)
                         Case "goto"
                             returnVal = cmdGoto(command.parameters)
+                        Case "iffileexist"
+                            returnVal = cmdIfFileExist(command.parameters)
+                        Case "ifdirexist"
+                            returnVal = cmdIfDirExist(command.parameters)
+                        Case "include"
+                            returnVal = cmdInclude(command.parameters)
+                            _cmdPointer -= 1 'Set cmdPointer back
                         Case Else
                             returnVal = New cmdError("Command not known", cmdErrorCode.SyntaxError, True)
                     End Select
@@ -391,6 +397,61 @@
             _cmdPointer = callStack.Pop
         End If
         Return New cmdError()
+    End Function
+    Private Function cmdIfFileExist(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.FileExists(parameters(0)) Then
+                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True) Else Return New cmdError("File Exist", 0, False)
+            Else
+                If parameters.Count > 2 Then
+                    If doJump(parameters(2)) = False Then
+                        Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+                    Else
+                        Return New cmdError("File not exist", 0, False)
+                    End If
+                Else
+                    Return New cmdError()
+                End If
+            End If
+        Catch ex As Exception
+            Return New cmdError("Something went wrong while checking file existence", cmdErrorCode.IOError, True)
+        End Try
+    End Function
+    Private Function cmdIfDirExist(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.FileSystem.DirectoryExists(parameters(0)) Then
+                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True) Else Return New cmdError("Directory Exist", 0, False)
+            Else
+                If parameters.Count > 2 Then
+                    If doJump(parameters(2)) = False Then
+                        Return New cmdError("No matching jumpoint found", cmdErrorCode.Failed, True)
+                    Else
+                        Return New cmdError("Directory not exist", 0, False)
+                    End If
+                Else
+                    Return New cmdError()
+                End If
+            End If
+        Catch ex As Exception
+            Return New cmdError("Something went wrong while checking directory existence", cmdErrorCode.IOError, True)
+        End Try
+    End Function
+
+    Private Function cmdInclude(parameters As List(Of String)) As cmdError
+        cmds.RemoveAt(_cmdPointer) 'Remove Include out of commands
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        If My.Computer.FileSystem.FileExists(parameters(0)) Then
+            Try
+                addCommands(My.Computer.FileSystem.ReadAllText(parameters(0)))
+                Return New cmdError()
+            Catch ex As Exception
+                Return New cmdError("Error while loading file", cmdErrorCode.IOError, True)
+            End Try
+        Else
+            Return New cmdError("File to include does not exist", cmdErrorCode.FileDosNotExist, True)
+        End If
     End Function
 #End Region
 End Class
