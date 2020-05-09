@@ -88,6 +88,7 @@
         IOError = 200
         DirectoryDosNotExist = 201
         FileDosNotExist = 202
+        NetworkError = 300
     End Enum
     Public Class cmd
         Public command As String
@@ -213,12 +214,16 @@
                             returnVal = cmdIfFileExist(command.parameters)
                         Case "ifdirexist"
                             returnVal = cmdIfDirExist(command.parameters)
+                        Case "ifpingsuccessfull"
+                            returnVal = cmdIfPingSuccessfull(command.parameters)
                         Case "iftaskexist"
                             returnVal = cmdIfTaskExist(command.parameters)
                         Case "taskkill"
                             returnVal = cmdTaskKill(command.parameters)
                         Case "taskclose"
                             returnVal = cmdTaskClose(command.parameters)
+                        Case "wget", "download"
+                            returnVal = cmdWget(command.parameters)
                         Case "include"
                             returnVal = cmdInclude(command.parameters)
                             _cmdPointer -= 1 'Set cmdPointer back
@@ -451,6 +456,23 @@
             Return New cmdError("Something went wrong while checking directory existence", cmdErrorCode.IOError, True)
         End Try
     End Function
+    Private Function cmdIfPingSuccessfull(parameters As List(Of String)) As cmdError
+        If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If My.Computer.Network.Ping(parameters(0), 2000) Then
+                If doJump(parameters(1)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError("Host is reachable", 0, False)
+            Else
+                If parameters.Count > 2 Then
+                    If doJump(parameters(2)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True) Else Return New cmdError("Host is not reachable", 0, False)
+                End If
+                Return New cmdError
+            End If
+        Catch ex As Exception
+            'Return New cmdError("Something went wrong while pinging host", cmdErrorCode.NetworkError, True)
+            If parameters.Count > 2 Then If doJump(parameters(2)) = False Then Return New cmdError("No matching jumppoint found", cmdErrorCode.Failed, True)
+            Return New cmdError("Host could not been checked", 0, False)
+        End Try
+    End Function
     Private Function cmdIfTaskExist(parameters As List(Of String)) As cmdError
         If parameters.Count < 2 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
         For Each item As System.Diagnostics.Process In Process.GetProcessesByName(parameters(0))
@@ -476,7 +498,27 @@
         Next
         Return New cmdError
     End Function
-
+    Private Function cmdWget(parameters As List(Of String)) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If parameters.Count >= 4 Then
+                My.Computer.Network.DownloadFile(parameters(0), parameters(1), parameters(2), parameters(3), False, 100000, True)
+            ElseIf parameters.Count >= 2 Then
+                My.Computer.Network.DownloadFile(parameters(0), parameters(1), "", "", False, 100000, True)
+            Else
+                Dim url As New Uri(parameters(0))
+                Dim tempFileName As String = IO.Path.GetFileName(url.LocalPath)
+                If tempFileName.Count > 0 Then
+                    My.Computer.Network.DownloadFile(parameters(0), tempFileName, "", "", False, 100000, True)
+                Else
+                    Return New cmdError("Download URL has no filename in it. Please specify the name in the scondary parameter", cmdErrorCode.Failed, True)
+                End If
+            End If
+            Return New cmdError
+        Catch ex As Exception
+            Return New cmdError("Error while donwloading file", cmdErrorCode.IOError, True)
+        End Try
+    End Function
 
     Private Function cmdInclude(parameters As List(Of String)) As cmdError
         cmds.RemoveAt(_cmdPointer) 'Remove Include out of commands
@@ -492,5 +534,6 @@
             Return New cmdError("File to include does not exist", cmdErrorCode.FileDosNotExist, True)
         End If
     End Function
+
 #End Region
 End Class
