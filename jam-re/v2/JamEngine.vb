@@ -190,6 +190,10 @@
                             returnVal = cmdClear()
                         Case "exit"
                             returnVal = cmdExit(command.parameters)
+                        Case "start"
+                            returnVal = cmdStart(command.parameters, False)
+                        Case "startwait"
+                            returnVal = cmdStart(command.parameters, True)
                         Case "deldir", "rmdir"
                             returnVal = cmdDelDir(command.parameters)
                         Case "copydir", "cpdir"
@@ -265,6 +269,27 @@
         If IsNumeric(parameters(0)) = False Then Return New cmdError("No number as parameter", cmdErrorCode.WrongType, True)
         Threading.Thread.Sleep(parameters(0) * 1000)
         Return New cmdError()
+    End Function
+    Private Function cmdStart(parameters As List(Of String), wait As Boolean) As cmdError
+        If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
+        Try
+            If wait Then
+                If parameters.Count > 1 Then
+                    Process.Start(parameters(0), parameters(1)).WaitForExit()
+                Else
+                    Process.Start(parameters(0)).WaitForExit()
+                End If
+            Else
+                If parameters.Count > 1 Then
+                    Process.Start(parameters(0), parameters(1))
+                Else
+                    Process.Start(parameters(0))
+                End If
+            End If
+        Catch ex As Exception
+            Return New cmdError("Error while execute command", cmdErrorCode.Failed, True)
+        End Try
+        Return New cmdError
     End Function
     Private Function cmdDelDir(parameters As List(Of String)) As cmdError
         If parameters.Count < 1 Then Return New cmdError("Command has no parameters", cmdErrorCode.NotEnoughParameter, True)
